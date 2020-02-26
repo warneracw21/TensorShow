@@ -50,20 +50,82 @@ const ROW_DIFF = 200;
 
 
 
-const calcGroupWidth = (state, currRow, currGroup) => {
+const propogateWidth = (PositionTree, slot, child_position, begin_position) => {
 
-  const data = state[currRow][currGroup]
-  const groupWidth = data.reduce((acc, curr) => (acc + curr.width));
+  // Start pulling attributes
+  const child_row_pos = child_position.row;
+  const child_group_pos = child_position.group;
+  const child_slot_pos = child_position.slot;
+
+  ////////////////////////////////////////////////////////////////////////
+  // FIRST RECURSION
+  ////////////////////////////////////////////////////////////////////////
+  // Add the slot to the child_position
+  if (begin_position.row === child_position.row) {
+    PositionTree.rows[child_row_pos].groups[child_group_pos].slots[child_slot_pos] = slot
+  }
+
+  ////////////////////////////////////////////////////////////////////////
+  // STEP 1: UPDATE CHILD GROUP width
+  ////////////////////////////////////////////////////////////////////////
+  const child_group = PositionTree.rows[child_row_pos].groups[child_group_pos];
+  
+  // Iterate over the SLOT keys and SUM the width of each SLOT to get GROUP width
+  let slot_key;
+  var group_width = 0;
+  const child_slot_keys = Object.keys(child_group.slots)
+  for (var key_ind=0; key_ind<child_slot_keys.length; key_ind++) {
+    slot_key = child_slot_keys[key_ind];
+    group_width += child_group.slots[slot_key].disp.width
+  }
+
+  // Set CHILD GROUP width
+  PositionTree.rows[child_row_pos].groups[child_group_pos].disp.width = group_width;
 
 
+  ////////////////////////////////////////////////////////////////////////
+  // STEP 2: UPDATE CHILD ROW width
+  ////////////////////////////////////////////////////////////////////////
 
+  // Iterate over the GROUP keys and SUM the width of each GROUP to get ROW width
+  const child_row = PositionTree.rows[child_row_pos];
+  let group_key;
+  var row_width = 0;
+  const child_group_keys = Object.keys(child_row.groups)
+  for (key_ind=0; key_ind<child_group_keys.length; key_ind++) {
+    group_key = child_group_keys[key_ind];
+    row_width += child_row.groups[group_key].disp.width
+  }
+
+  // Set CHILD ROW width
+  PositionTree.rows[child_row_pos].disp.width = row_width;
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // BASE CASE: Child Row is already 0
+  ////////////////////////////////////////////////////////////////////////
+  const parent_row_pos = child_row_pos - 1;
+  if (parent_row_pos == -1) {
+    console.log(PositionTree)
+    return PositionTree;
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // STEP 3: UPDATE PARENT SLOT width
+  ////////////////////////////////////////////////////////////////////////
+  const parent_group_pos = slot.group_path[slot.group_path.length - 2]
+  const parent_slot_pos = child_group_pos
+  PositionTree.rows[parent_row_pos].groups[parent_group_pos].slots[parent_slot_pos].disp.width = group_width
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // STEP 3: Call Recursion
+  ////////////////////////////////////////////////////////////////////////
+  const parent_position = {row: parent_row_pos, group: parent_group_pos, slot: parent_slot_pos}
+  propogateWidth(PositionTree, slot, parent_position, begin_position)
 
 }
-
-const calcRowWidth = () => {
-
-}
-
 
 
 
@@ -93,7 +155,8 @@ const CardPosStoreProvider = (params) => {
                   y: 0,
                   height: 200,
                   width: 200
-                }
+                },
+                group_path: [0]
               }
             }
           }
@@ -114,7 +177,7 @@ const CardPosStoreProvider = (params) => {
         // and add the child to slot list of correct group
 
         // Make deep copy of old state
-        const newState = {...state};
+        var new_state = {...state};
 
         // Grab Row and Group from Sender
         const sender_row = action.senderPos.row;
@@ -122,72 +185,43 @@ const CardPosStoreProvider = (params) => {
         const sender_slot = action.senderPos.slot;
 
         // Find Row and Group in State
-        const parent_row = newState.rows[sender_row];
+        const parent_row = new_state.rows[sender_row];
         const parent_group = parent_row.groups[sender_group];
         const parent_slot = parent_group.slots[sender_slot];
 
         // Add child to data structure
         // Are we creating a new row?
-        if (newState.rows[sender_row + 1] === undefined) {
-          newState.rows[sender_row + 1] = {}
-          newState.rows[sender_row + 1] = { disp: {}, groups: {0: {disp: {}, slots: {}}} }
+        if (new_state.rows[sender_row + 1] === undefined) {
+          new_state.rows[sender_row + 1] = {}
+          new_state.rows[sender_row + 1] = { disp: {}, groups: {0: {disp: {}, slots: {}}} }
         }
 
         // REMEMBER: the sender slot is the same as the receiver group
-        console.log(newState)
-        const child_row = newState.rows[sender_row + 1]
+        const child_row = new_state.rows[sender_row + 1]
         const child_group = child_row.groups[sender_slot]
 
         // Get slot key for child
         const group_slot_keys = Object.keys(child_group.slots)
-        const child_slot_key = group_slot_keys.length;
+        const child_slot = group_slot_keys.length;
 
-        // Add child to correct slot
-        child_group.slots[child_slot_key] = {
+        // Get group path for slot (sender_slot is child_group)
+        const child_group_path = [...parent_slot.group_path, sender_slot]
+
+
+        // Prepare arguments for propogation
+        const slot_position = {row: sender_row + 1, group: sender_slot, slot: child_slot}
+        const slot = {
           disp: {
             x: 0,
             y: 0,
             height: SLOT_HEIGHT,
             width: SLOT_WIDTH + SLOT_PADDING
-          }
+          },
+          group_path: child_group_path
         }
 
-        // 1) Propogate changes: Adjust parent slot width
-        // a) sum together the width of all slots in CHILD GROUP corresponding to PARENT SLOT
-        const child_slot_keys = Object.keys(child_group.slots)
-        let slot_key;
-        var child_group_width = 0;
-        for (var key_ind=0; key_ind<child_slot_keys.length; key_ind++) {
-          console.log("HERE")
-          slot_key = child_slot_keys[key_ind];
-          child_group_width += child_group.slots[slot_key].disp.width
-
-        } 
-        // b) adjust PARENT SLOT width to be the same as CHILD_GROUP width
-        newState.rows[sender_row].groups[sender_group].slots[sender_slot] = child_group_width;
-
-        // 2) Propogate changes: Adjust parent group width
-        // a) sum together the width of all slots in CHILD GROUP corresponding to PARENT SLOT
-        const child_slot_keys = Object.keys(child_group.slots)
-        let slot_key;
-        var child_group_width = 0;
-        for (var key_ind=0; key_ind<child_slot_keys.length; key_ind++) {
-          console.log("HERE")
-          slot_key = child_slot_keys[key_ind];
-          child_group_width += child_group.slots[slot_key].disp.width
-
-        } 
-        // b) adjust PARENT SLOT width to be the same as CHILD_GROUP width
-        newState.rows[sender_row].groups[sender_group].slots[sender_slot] = child_group_width;
-
-
-
-        
-
-
-
-
-
+        new_state = propogateWidth({...new_state}, slot, {...slot_position}, slot_position);
+        console.log(new_state)
 
       }
     }
