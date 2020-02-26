@@ -16,7 +16,7 @@ const SVGCardStoreProvider = (params) => {
         var newState = [...state]
 
         const senderRow = action.senderPos.row;
-        const senderColumn = action.senderPos.column;
+        const senderColumn = action.senderPos.group;
 
         // Is there another row in the model yet?
         if (newState[senderRow + 1] === undefined) {
@@ -39,7 +39,6 @@ const SVGCardStoreProvider = (params) => {
 
         newState[row][column] = params;
 
-        console.log(newState)
         return newState;
 
         }
