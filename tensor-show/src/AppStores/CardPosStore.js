@@ -102,11 +102,9 @@ const updateRow= (tree, position) => {
 
 }
 
-const propogateWidth = (PositionTree, slot, child_position, begin_position, group_path) => {
+const propogateWidth = (PositionTree, slot, child_position, begin_position, group_path, slot_path) => {
 
-  // FIRST STEP (HACK) REDUCE group_path by one element before indexing it
-  const new_group_path = group_path.slice(0, group_path.length - 1)
-
+ 
   // Pull Child Position Attributes
   const child_row_pos = child_position.row;
   const child_group_pos = child_position.group;
@@ -114,8 +112,8 @@ const propogateWidth = (PositionTree, slot, child_position, begin_position, grou
 
   // Calculate Parent Position Attributes
   const parent_row_pos = child_row_pos - 1;
-  const parent_group_pos = new_group_path[new_group_path.length - 1]
-  const parent_slot_pos = child_group_pos;
+  const parent_group_pos = group_path[group_path.length - 1]
+  const parent_slot_pos = slot_path[slot_path.length - 1];
 
   let new_tree = { ...PositionTree };
 
@@ -164,10 +162,12 @@ const propogateWidth = (PositionTree, slot, child_position, begin_position, grou
   ////////////////////////////////////////////////////////////////////////
   // a) Update slot width (update parent slot corresponding to new group)
   const child_group_width = new_tree.rows[child_row_pos].groups[child_group_pos].disp.width;
-  console.log("Parent Group Path:", new_group_path)
+  console.log("Parent Group Path:", group_path)
+  console.log("Parent Slot Path:", slot_path)
   console.log("Parent Row Position:", parent_row_pos)
   console.log("Parent Group Position:", parent_group_pos)
-  console.log(new_tree.rows[parent_row_pos].groups)
+  console.log("Parent Slot Position:", parent_slot_pos)
+  console.log(new_tree)
   new_tree.rows[parent_row_pos].groups[parent_group_pos].slots[parent_slot_pos].disp.width = child_group_width;
   // b) Update slot offsets (iterate over slot widths)
   const parent_group = new_tree.rows[parent_row_pos].groups[parent_group_pos];
@@ -196,7 +196,12 @@ const propogateWidth = (PositionTree, slot, child_position, begin_position, grou
   // console.log("Updating Parent Row")
   new_tree = updateRow(new_tree, parent_position);
 
-  return propogateWidth(new_tree, slot, parent_position, begin_position, new_group_path); 
+   // Reduce the group and slot paths by 1
+  const new_group_path = group_path.slice(0, group_path.length - 1);
+  const new_slot_path = slot_path.slice(0, slot_path.length - 1);
+
+
+  return propogateWidth(new_tree, slot, parent_position, begin_position, new_group_path, new_slot_path); 
 }
 
 const calculateTotalGroupWidth = (PositionTree, row) => {
@@ -221,7 +226,7 @@ const CardPosStoreProvider = (params) => {
           x: 0,
           y: 0,
           height: SLOT_HEIGHT,
-          width: SLOT_WIDTH + SLOT_PADDING
+          width: SLOT_WIDTH
         },
         groups: {
           0: {
@@ -229,7 +234,7 @@ const CardPosStoreProvider = (params) => {
               x: 0,
               y: 0,
               height: SLOT_HEIGHT,
-              width: SLOT_WIDTH + SLOT_PADDING
+              width: SLOT_WIDTH
             },
             slots: {
               0: {
@@ -237,10 +242,12 @@ const CardPosStoreProvider = (params) => {
                   x: 0,
                   y: 0,
                   height: SLOT_HEIGHT,
-                  width: SLOT_WIDTH + SLOT_PADDING
+                  width: SLOT_WIDTH
                 },
-                group_path: [0],
-                active_connections: [false, false, false, false]
+                group_path: [],
+                slot_path: [],
+                active_connections: [false, false, false, false],
+                render: true
               }
             }
           }
@@ -256,37 +263,41 @@ const CardPosStoreProvider = (params) => {
 
     switch (action.type) {
       case ('add_child'): {
-
-        // We need to update the container of the parent 
-        // and add the child to slot list of correct group
+        console.log("ADDING CHILD")
 
         // Make deep copy of old state
         var new_state = {...state};
 
         // Grab Row and Group from Sender
-        const sender_row = action.sender_pos.row;
-        const sender_group = action.sender_pos.group;
-        const sender_slot = action.sender_pos.slot;
+        const parent_row_pos = action.sender_pos.row;
+        const parent_group_pos = action.sender_pos.group;
+        const parent_slot_pos = action.sender_pos.slot;
 
-        // // Check active connections of parent
-        // if (new_state.rows[sender_row].groups[sender_group].slots[sender_slot].active_connections[action.conn_pos]) {
-        //   return state
-        // }
+        console.log(action.sender_pos)
 
-        // Find Row and Group in State
-        const parent_row = new_state.rows[sender_row];
-        const parent_group = parent_row.groups[sender_group];
-        const parent_slot = parent_group.slots[sender_slot];
+
+        // Find Row, Group and Slot of Parent in State
+        const parent_row = new_state.rows[parent_row_pos];
+        const parent_group = parent_row.groups[parent_group_pos];
+        const parent_slot = parent_group.slots[parent_slot_pos];
+        
+        // Get history
+        const parent_group_path = parent_slot.group_path;
+        const parent_slot_path = parent_slot.slot_path;
+
+        // Calculate new group key
+        const child_group_key = `${parent_row_pos}${parent_group_pos}${parent_slot_pos}`
+        console.log(child_group_key)
 
 
         // Add child to data structure
         // Are we creating a new row?
-        if (new_state.rows[sender_row + 1] === undefined) {
+        if (new_state.rows[parent_row_pos + 1] === undefined) {
           console.log("Adding New Row")
-          new_state.rows[sender_row + 1] = {
+          new_state.rows[parent_row_pos + 1] = {
             disp: {
               x: 0,
-              y: ROW_INIT + (sender_row + 1)*ROW_DIFF,
+              y: ROW_INIT + (parent_row_pos + 1)*ROW_DIFF,
               width: SLOT_WIDTH,
               height: SLOT_HEIGHT
             },
@@ -294,30 +305,114 @@ const CardPosStoreProvider = (params) => {
           }
         }
 
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // Are we creating a new group
-        // We need to add groups up until the new group (propChanges will handle offsets)
-        if (new_state.rows[sender_row + 1].groups[sender_slot] === undefined) {
+        // 1) for each group in parent row
+          // 2 for each slot in the group
+            // each slot should have a group with a slot
+              // if the group id already exists, skip
+              // else, make new group with one slot
+        if (new_state.rows[parent_row_pos + 1].groups[parent_row_pos] === undefined) {
           console.log("Adding New Group")
-          console.log("Sender Slot:", sender_slot)
 
-          for (var k=0; k<=sender_slot; k++) {
+          let group_key;
+          const parent_group_keys = Object.keys(new_state.rows[parent_row_pos].groups)
+          let parent_slot_keys;
+          let parent_group_key, parent_slot_key;
+          let tmp_parent_group, tmp_parent_slot;
 
-          if (!(new_state.rows[sender_row + 1].groups[k] === undefined)) {
-            continue
-          }
+          // Iterate over Parent Group Keys
+          for (var i=0; i<parent_group_keys.length; i++) {
+            parent_group_key = parent_group_keys[i];
+            tmp_parent_group = new_state.rows[parent_row_pos].groups[parent_group_key];
+            parent_slot_keys = Object.keys(tmp_parent_group.slots)
 
-          new_state.rows[sender_row + 1].groups[k] = {
-            disp: {
-              x: 0,
-              y: 0,
-              width: SLOT_WIDTH,
-              height: SLOT_HEIGHT
-            },
-            slots: {}
+            // Iterate over slot keys in the parent group
+            for (var j=0; j<parent_slot_keys.length; j++) {
+              parent_slot_key = parent_slot_keys[j];
+              tmp_parent_slot = new_state.rows[parent_row_pos].groups[parent_group_key].slots[parent_slot_key];
+              
+              // Calculate Group Key ROW|GROUP|SLOT
+              group_key = `${parent_row_pos}${parent_group_key}${parent_slot_key}`;
+              console.log(group_key)
+
+              // Check if this key is in the child row's groups
+              if (!(new_state.rows[parent_row_pos + 1].groups[group_key] === undefined)) {
+                
+                // Check if this group is the one we need to be in
+                continue
+
+              }
+              console.log("...adding group with one slot")
+
+              // Add a new group with one slot
+              new_state.rows[parent_row_pos + 1].groups[group_key] = {
+                disp: {
+                  x: 0,
+                  y: 0,
+                  width: SLOT_WIDTH,
+                  height: SLOT_HEIGHT
+                },
+                slots: {
+                  0: {
+                    disp: {
+                      x: 0,
+                      y: 0,
+                      width: SLOT_WIDTH,
+                      height: SLOT_HEIGHT
+                    },
+                    group_path: [...tmp_parent_slot.group_path, parent_group_key],
+                    slot_path: [...tmp_parent_slot.slot_path, parent_slot_key],
+                    active_connections: [false, false, false, false],
+                    render: false
+                  }
+                }
+              }
             }
           }
-
+          console.log("State after adding new group:", new_state)
         }
+
+
+
+
+
+          // for (var k=0; k<=sender_slot; k++) {
+
+          //   if (!(new_state.rows[sender_row + 1].groups[k] === undefined)) {
+          //     continue
+          //   }
+
+          //   new_state.rows[sender_row + 1].groups[k] = {
+          //     disp: {
+          //       x: 0,
+          //       y: 0,
+          //       width: SLOT_WIDTH,
+          //       height: SLOT_HEIGHT
+          //     },
+          //     slots: {
+
+          //     }
+          //   }
+          // }
+        // }
           
           // // Calculate total offset for new group
           // // 1) add parent group offset
@@ -330,20 +425,31 @@ const CardPosStoreProvider = (params) => {
 
   
 
+
         // REMEMBER: the sender slot is the same as the receiver group
-        const child_row = new_state.rows[sender_row + 1]
-        const child_group = child_row.groups[sender_slot]
+        const child_row = new_state.rows[parent_row_pos + 1]
+        const child_group = child_row.groups[child_group_key]
 
         // Get slot key for child
-        const group_slot_keys = Object.keys(child_group.slots)
-        const child_slot = group_slot_keys.length;
+        const group_slot_keys = Object.keys(child_group.slots);
+        let child_slot_pos;
+        if (group_slot_keys.length === 0) {
+          child_slot_pos = 0
+        } else {
+          child_slot_pos = group_slot_keys.length;
+        }
 
-        // Get group path for slot (sender_slot is child_group)
-        const child_group_path = [...parent_slot.group_path, sender_slot]
-
+        // Get group path and slot_path histories
+        const child_group_path = [...parent_group_path, parent_group_pos]
+        const child_slot_path = [...parent_slot_path, parent_slot_pos]
 
         // Prepare arguments for propogation
-        const slot_position = {row: sender_row + 1, group: sender_slot, slot: child_slot}
+        const slot_position = {
+          row: parent_row_pos + 1, 
+          group: child_group_key, 
+          slot: child_slot_pos
+        }
+
         const slot = {
           disp: {
             x: 0,
@@ -352,10 +458,22 @@ const CardPosStoreProvider = (params) => {
             width: SLOT_WIDTH + SLOT_PADDING
           },
           group_path: child_group_path,
-          active_connections: [false, false, false, false]
+          slot_path: child_slot_path,
+          active_connections: [false, false, false, false],
+          render: true
         }
 
-        new_state = propogateWidth({...new_state}, slot, {...slot_position}, {...slot_position}, child_group_path);
+        // Propogate changes after adding new slot
+        new_state = propogateWidth(
+          {...new_state}, 
+          slot, 
+          {...slot_position}, 
+          {...slot_position}, 
+          child_group_path, 
+          child_slot_path
+        );
+        
+        console.log("Done Updating State")
         return new_state
 
       }
