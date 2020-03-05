@@ -256,9 +256,6 @@ const CardPosStoreProvider = (params) => {
     }
   }
 
-
-
-
   const [cardPosStoreState, cardPosStoreDispatch] = React.useReducer((state, action) => {
 
     switch (action.type) {
@@ -272,9 +269,6 @@ const CardPosStoreProvider = (params) => {
         const parent_row_pos = action.sender_pos.row;
         const parent_group_pos = action.sender_pos.group;
         const parent_slot_pos = action.sender_pos.slot;
-
-        console.log(action.sender_pos)
-
 
         // Find Row, Group and Slot of Parent in State
         const parent_row = new_state.rows[parent_row_pos];
@@ -304,24 +298,6 @@ const CardPosStoreProvider = (params) => {
             groups: {}
           }
         }
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         // Are we creating a new group
         // 1) for each group in parent row
@@ -357,7 +333,13 @@ const CardPosStoreProvider = (params) => {
               if (!(new_state.rows[parent_row_pos + 1].groups[group_key] === undefined)) {
                 
                 // Check if this group is the one we need to be in
-                continue
+                console.log(`${parent_row_pos}${parent_group_key}${parent_slot_key}`)
+                console.log(child_group_key)
+
+                if (!(`${parent_row_pos}${parent_group_key}${parent_slot_key}` === child_group_key)) {
+                  console.log("HERE")
+                  continue
+                }
 
               }
               console.log("...adding group with one slot")
@@ -389,42 +371,6 @@ const CardPosStoreProvider = (params) => {
           }
           console.log("State after adding new group:", new_state)
         }
-
-
-
-
-
-          // for (var k=0; k<=sender_slot; k++) {
-
-          //   if (!(new_state.rows[sender_row + 1].groups[k] === undefined)) {
-          //     continue
-          //   }
-
-          //   new_state.rows[sender_row + 1].groups[k] = {
-          //     disp: {
-          //       x: 0,
-          //       y: 0,
-          //       width: SLOT_WIDTH,
-          //       height: SLOT_HEIGHT
-          //     },
-          //     slots: {
-
-          //     }
-          //   }
-          // }
-        // }
-          
-          // // Calculate total offset for new group
-          // // 1) add parent group offset
-          // // 2) add parent slot offset
-          // let new_group_offset = 0;
-          // new_group_offset = new_state.rows[sender_row].groups[sender_group].disp.x;
-          // new_group_offset += new_state.rows[sender_row].groups[sender_group].slots[sender_slot].disp.x;
-          // console.log("New Group Offset:", new_group_offset)
-
-
-  
-
 
         // REMEMBER: the sender slot is the same as the receiver group
         const child_row = new_state.rows[parent_row_pos + 1]
@@ -473,7 +419,7 @@ const CardPosStoreProvider = (params) => {
           child_slot_path
         );
         
-        console.log("Done Updating State")
+        console.log("DONE UPDATING STATE")
         return new_state
 
       }
@@ -483,6 +429,8 @@ const CardPosStoreProvider = (params) => {
 
   }, init_card_pos);
 
+
+
   return (
     <CardPosStoreStateContext.Provider value={ cardPosStoreState }>
       <CardPosStoreDispatchContext.Provider value ={ cardPosStoreDispatch }>
@@ -491,6 +439,9 @@ const CardPosStoreProvider = (params) => {
     </CardPosStoreStateContext.Provider>
   )
 }
+
+
+
 
 const useCardPosStoreState = () => {
   const context = React.useContext(CardPosStoreStateContext);
@@ -514,58 +465,4 @@ const useCardPosStoreDispatch = () => {
 
 
 export { CardPosStoreProvider, useCardPosStoreState, useCardPosStoreDispatch }
-
-      //   new_state.rows[sender_row + 1] = {
-        //     disp: {
-        //       x: 0,
-        //       y: 50 + (200 * (sender_row + 1)),
-        //       width: 0,
-        //       height: 250
-        //     }, 
-        //     groups: {
-        //       0: {
-        //         disp: {
-        //           x: 0,
-        //           y: 0,
-        //           width: 0,
-        //           height: 250
-        //         }, 
-        //         slots: {
-        //           0: {
-        //             disp: {
-        //               x: 0,
-        //               y: 0,
-        //               width: SLOT_WIDTH + SLOT_PADDING,
-        //               height: SLOT_HEIGHT
-        //             }
-        //           },
-        //           1: {
-        //             disp: {
-        //               x: 0,
-        //               y: 0,
-        //               width: SLOT_WIDTH + SLOT_PADDING,
-        //               height: SLOT_HEIGHT
-        //             }
-        //           },
-        //           2: {
-        //             disp: {
-        //               x: 0,
-        //               y: 0,
-        //               width: SLOT_WIDTH + SLOT_PADDING,
-        //               height: SLOT_HEIGHT
-        //             }
-        //           },
-        //           3: {
-        //             disp: {
-        //               x: 0,
-        //               y: 0,
-        //               width: SLOT_WIDTH + SLOT_PADDING,
-        //               height: SLOT_HEIGHT
-        //             }
-        //           }
-        //         }
-        //       }
-        //     } 
-        //   }
-        // }
 
