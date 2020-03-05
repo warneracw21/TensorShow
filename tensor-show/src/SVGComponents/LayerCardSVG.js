@@ -13,7 +13,7 @@ export default function LayerCardSVG(params) {
 
 
   return (
-    <svg x={params.x} y={params.y} width="208px" height="203px" version="1.1" xmlnsXlink="http://www.w3.org/1999/xlink">
+    <svg x={0} y={0} width="190px" height="200px" version="1.1" xmlnsXlink="http://www.w3.org/1999/xlink">
       <defs>
           <linearGradient x1="47.0796717%" y1="83.3533249%" x2="27.04726%" y2="185.215584%" id="linearGradient-1">
               <stop stopColor="#FFFFFF" offset="0%"></stop>
@@ -72,27 +72,27 @@ export default function LayerCardSVG(params) {
           </text>
           <circle 
             id="Oval" fillOpacity="0.539089816" fill="#180000" cx="37" cy="186" r="10"
-            onMouseOver={() => onMouseOverRivet({connPos: 0, action: 'over', senderPos: params.senderPos})}
-            onMouseOut={() => onMouseOverRivet({connPos: 0, action: 'out', senderPos: params.senderPos})}
-            onClick={() => onMouseClickRivet({connPos: 0, senderPos: params.senderPos})}
+            onMouseOver={(event) => onMouseOverRivet(event, {conn_pos: 0, action: 'over', sender_pos: params.sender_pos})}
+            onMouseOut={(event) => onMouseOverRivet(event, {conn_pos: 0, action: 'out', sender_pos: params.sender_pos})}
+            onClick={(event) => onMouseClickRivet(event, params.sender_pos)}
           ></circle>
           <circle 
             id="Oval" fillOpacity="0.539089816" fill="#180000" cx="82" cy="186" r="10"
-            onMouseOver={() => onMouseOverRivet({connPos: 1, action: 'over', senderPos: params.senderPos})}
-            onMouseOut={() => onMouseOverRivet({connPos: 1, action: 'out', senderPos: params.senderPos})}
-            onClick={() => onMouseClickRivet({connPos: 1, senderPos: params.senderPos})}
+            onMouseOver={(event) => onMouseOverRivet(event, {conn_pos: 1, action: 'over', sender_pos: params.sender_pos})}
+            onMouseOut={(event) => onMouseOverRivet(event, {conn_pos: 1, action: 'out', sender_pos: params.sender_pos})}
+            onClick={(event) => onMouseClickRivet(event, params.sender_pos)}
           ></circle>
           <circle 
             id="Oval" fillOpacity="0.539089816" fill="#180000" cx="127" cy="186" r="10"
-            onMouseOver={() => onMouseOverRivet({connPos: 2, action: 'over', senderPos: params.senderPos})}
-            onMouseOut={() => onMouseOverRivet({connPos: 2, action: 'out', senderPos: params.senderPos})}
-            onClick={() => onMouseClickRivet({connPos: 2, senderPos: params.senderPos})}
+            onMouseOver={(event) => onMouseOverRivet(event, {conn_pos: 2, action: 'over', sender_pos: params.sender_pos})}
+            onMouseOut={(event) => onMouseOverRivet(event, {conn_pos: 2, action: 'out', sender_pos: params.sender_pos})}
+            onClick={(event) => onMouseClickRivet(event, params.sender_pos)}
           ></circle>
           <circle 
             id="Oval" fillOpacity="0.539089816" fill="#180000" cx="172" cy="186" r="10"
-            onMouseOver={() => onMouseOverRivet({connPos: 3, action: 'over', senderPos: params.senderPos})}
-            onMouseOut={() => onMouseOverRivet({connPos: 3, action: 'out', senderPos: params.senderPos})}
-            onClick={() => onMouseClickRivet({connPos: 3, senderPos: params.senderPos})}
+            onMouseOver={(event) => onMouseOverRivet(event, {conn_pos: 3, action: 'over', sender_pos: params.sender_pos})}
+            onMouseOut={(event) => onMouseOverRivet(event, {conn_pos: 3, action: 'out', sender_pos: params.sender_pos})}
+            onClick={(event) => onMouseClickRivet(event, params.sender_pos)}
           ></circle>
       </g>
     </svg>
