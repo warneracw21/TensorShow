@@ -7,17 +7,23 @@ import { useStyles } from './styles';
 import TensorShow from './TensorShow';
 
 // Import Contexts
-import { SVGCardStoreProvider } from './SVGCardStore';
+import { SVGCardStoreProvider } from './AppStores/SVGCardStore';
+import { CardPosStoreProvider } from './AppStores/CardPosStore';
 
 function App() {
   const classes = useStyles();
 
+  // Get window dimensions
+  console.log(window.screen)
+
   return (
 
     <div className={classes.app}>
-    	<SVGCardStoreProvider>
-    		<TensorShow/>
-    	</SVGCardStoreProvider>
+      <CardPosStoreProvider>
+      <SVGCardStoreProvider>
+        <TensorShow/>
+      </SVGCardStoreProvider>
+      </CardPosStoreProvider>
    </div>
   );
 }
