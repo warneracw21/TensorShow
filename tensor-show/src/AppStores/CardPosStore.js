@@ -216,7 +216,6 @@ const calculateTotalGroupWidth = (PositionTree, row) => {
 }
 
 
-
 const CardPosStoreProvider = (params) => {
 
   const init_card_pos = {
@@ -279,11 +278,6 @@ const CardPosStoreProvider = (params) => {
         const parent_group_path = parent_slot.group_path;
         const parent_slot_path = parent_slot.slot_path;
 
-        // Calculate new group key
-        const child_group_key = `${parent_row_pos}${parent_group_pos}${parent_slot_pos}`
-        console.log(child_group_key)
-
-
         // Add child to data structure
         // Are we creating a new row?
         if (new_state.rows[parent_row_pos + 1] === undefined) {
@@ -326,23 +320,12 @@ const CardPosStoreProvider = (params) => {
               tmp_parent_slot = new_state.rows[parent_row_pos].groups[parent_group_key].slots[parent_slot_key];
               
               // Calculate Group Key ROW|GROUP|SLOT
-              group_key = `${parent_row_pos}${parent_group_key}${parent_slot_key}`;
-              console.log(group_key)
+              group_key = `${parent_group_key}${parent_slot_key}`;
 
               // Check if this key is in the child row's groups
               if (!(new_state.rows[parent_row_pos + 1].groups[group_key] === undefined)) {
-                
-                // Check if this group is the one we need to be in
-                console.log(`${parent_row_pos}${parent_group_key}${parent_slot_key}`)
-                console.log(child_group_key)
-
-                if (!(`${parent_row_pos}${parent_group_key}${parent_slot_key}` === child_group_key)) {
-                  console.log("HERE")
-                  continue
-                }
-
+                continue
               }
-              console.log("...adding group with one slot")
 
               // Add a new group with one slot
               new_state.rows[parent_row_pos + 1].groups[group_key] = {
@@ -372,6 +355,10 @@ const CardPosStoreProvider = (params) => {
           console.log("State after adding new group:", new_state)
         }
 
+        // Calculate new group key
+        const child_group_key = `${parent_group_pos}${parent_slot_pos}`
+        console.log(child_group_key)
+
         // REMEMBER: the sender slot is the same as the receiver group
         const child_row = new_state.rows[parent_row_pos + 1]
         const child_group = child_row.groups[child_group_key]
@@ -379,8 +366,16 @@ const CardPosStoreProvider = (params) => {
         // Get slot key for child
         const group_slot_keys = Object.keys(child_group.slots);
         let child_slot_pos;
-        if (group_slot_keys.length === 0) {
-          child_slot_pos = 0
+        // Check if there is only one slot
+        if (group_slot_keys.length === 1) {
+
+          // Check if this slot has been rendered
+          if (new_state.rows[parent_row_pos + 1].groups[child_group_key].slots[0].render) {
+            child_slot_pos = 1;
+          } else {
+            child_slot_pos = 0;
+          }
+
         } else {
           child_slot_pos = group_slot_keys.length;
         }
@@ -423,9 +418,8 @@ const CardPosStoreProvider = (params) => {
         return new_state
 
       }
+      default: { return state };
     }
-
-    return state
 
   }, init_card_pos);
 
