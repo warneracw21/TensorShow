@@ -1,7 +1,9 @@
 import React from 'react';
+import sha256 from 'crypto-js/sha256';
+import Base64 from 'crypto-js/enc-base64';
 
-const CardPosStoreStateContext = React.createContext(null);
-const CardPosStoreDispatchContext = React.createContext(null);
+const TreePosStoreStateContext = React.createContext(null);
+const TreePosStoreDispatchContext = React.createContext(null);
 
 
 // Description of data structure
@@ -162,12 +164,11 @@ const propogateWidth = (PositionTree, slot, child_position, begin_position, grou
   ////////////////////////////////////////////////////////////////////////
   // a) Update slot width (update parent slot corresponding to new group)
   const child_group_width = new_tree.rows[child_row_pos].groups[child_group_pos].disp.width;
-  console.log("Parent Group Path:", group_path)
-  console.log("Parent Slot Path:", slot_path)
-  console.log("Parent Row Position:", parent_row_pos)
-  console.log("Parent Group Position:", parent_group_pos)
-  console.log("Parent Slot Position:", parent_slot_pos)
-  console.log(new_tree)
+  // console.log("Parent Group Path:", group_path)
+  // console.log("Parent Slot Path:", slot_path)
+  // console.log("Parent Row Position:", parent_row_pos)
+  // console.log("Parent Group Position:", parent_group_pos)
+  // console.log("Parent Slot Position:", parent_slot_pos)
   new_tree.rows[parent_row_pos].groups[parent_group_pos].slots[parent_slot_pos].disp.width = child_group_width;
   // b) Update slot offsets (iterate over slot widths)
   const parent_group = new_tree.rows[parent_row_pos].groups[parent_group_pos];
@@ -216,7 +217,7 @@ const calculateTotalGroupWidth = (PositionTree, row) => {
 }
 
 
-const CardPosStoreProvider = (params) => {
+const TreePosStoreProvider = (params) => {
 
   const init_card_pos = {
     rows: {
@@ -246,7 +247,8 @@ const CardPosStoreProvider = (params) => {
                 group_path: [],
                 slot_path: [],
                 active_connections: [false, false, false, false],
-                render: true
+                render: true,
+                hash: Base64.stringify(sha256(0))
               }
             }
           }
@@ -255,11 +257,32 @@ const CardPosStoreProvider = (params) => {
     }
   }
 
-  const [cardPosStoreState, cardPosStoreDispatch] = React.useReducer((state, action) => {
+  const [treePosStoreState, treePosStoreDispatch] = React.useReducer((state, action) => {
 
     switch (action.type) {
+      case ('init'): {
+        console.log("INITIALIZING TREE");
+        return state;
+      }
+      
       case ('add_child'): {
         console.log("ADDING CHILD")
+
+        //////////////////////////////////////////////////////////////////////////////
+        // SUPREME HACK (IF ACTION.HASH is in ACTION.CURRENT_HASH_LIST, return state)
+        //////////////////////////////////////////////////////////////////////////////
+        var tmp_hash;
+        console.log("Current Hash:", action.hash)
+        console.log(action.current_hash_keys)
+        for (var p=0; p<action.current_hash_keys.length; p++) {
+          tmp_hash = action.current_hash_keys[p];
+          console.log(action.hash, tmp_hash)
+          if (action.hash == tmp_hash) {
+            console.log("here")
+            return state;
+          }
+
+        }
 
         // Make deep copy of old state
         var new_state = {...state};
@@ -293,13 +316,16 @@ const CardPosStoreProvider = (params) => {
           }
         }
 
+                // Calculate new group key
+        const child_group_key = `${parent_group_pos}${parent_slot_pos}`
+
         // Are we creating a new group
         // 1) for each group in parent row
           // 2 for each slot in the group
             // each slot should have a group with a slot
               // if the group id already exists, skip
               // else, make new group with one slot
-        if (new_state.rows[parent_row_pos + 1].groups[parent_row_pos] === undefined) {
+        if (new_state.rows[parent_row_pos + 1].groups[child_group_key] === undefined) {
           console.log("Adding New Group")
 
           let group_key;
@@ -352,12 +378,7 @@ const CardPosStoreProvider = (params) => {
               }
             }
           }
-          console.log("State after adding new group:", new_state)
         }
-
-        // Calculate new group key
-        const child_group_key = `${parent_group_pos}${parent_slot_pos}`
-        console.log(child_group_key)
 
         // REMEMBER: the sender slot is the same as the receiver group
         const child_row = new_state.rows[parent_row_pos + 1]
@@ -401,7 +422,8 @@ const CardPosStoreProvider = (params) => {
           group_path: child_group_path,
           slot_path: child_slot_path,
           active_connections: [false, false, false, false],
-          render: true
+          render: true,
+          hash: action.hash
         }
 
         // Propogate changes after adding new slot
@@ -426,31 +448,31 @@ const CardPosStoreProvider = (params) => {
 
 
   return (
-    <CardPosStoreStateContext.Provider value={ cardPosStoreState }>
-      <CardPosStoreDispatchContext.Provider value ={ cardPosStoreDispatch }>
+    <TreePosStoreStateContext.Provider value={ treePosStoreState }>
+      <TreePosStoreDispatchContext.Provider value ={ treePosStoreDispatch }>
         {params.children}
-      </CardPosStoreDispatchContext.Provider>
-    </CardPosStoreStateContext.Provider>
+      </TreePosStoreDispatchContext.Provider>
+    </TreePosStoreStateContext.Provider>
   )
 }
 
 
 
 
-const useCardPosStoreState = () => {
-  const context = React.useContext(CardPosStoreStateContext);
+const useTreePosStoreState = () => {
+  const context = React.useContext(TreePosStoreStateContext);
   if (context === undefined) {
-    alert("Please place useSVGCardStoreState in SVGCardStoreProvider");
+    alert("Please place useSVGCardStoreState in TreePosStoreStateContext");
     return;
   } else {
     return context
   }
 }
 
-const useCardPosStoreDispatch = () => {
-  const context = React.useContext(CardPosStoreDispatchContext);
+const useTreePosStoreDispatch = () => {
+  const context = React.useContext(TreePosStoreDispatchContext);
   if (context === undefined) {
-    alert("Please place useSVGCardStoreState in SVGCardStoreProvider");
+    alert("Please place useSVGCardStoreState in TreePosStoreDispatchContext");
     return;
   } else {
     return context
@@ -458,5 +480,5 @@ const useCardPosStoreDispatch = () => {
 }
 
 
-export { CardPosStoreProvider, useCardPosStoreState, useCardPosStoreDispatch }
+export { TreePosStoreProvider, useTreePosStoreState, useTreePosStoreDispatch }
 
