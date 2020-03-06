@@ -7,20 +7,29 @@ import { useStyles } from './styles';
 import TensorShow from './TensorShow';
 
 // Import Contexts
-import { CardPosStoreProvider } from './AppStores/CardPosStore';
+import { TreePosStoreProvider } from './AppStores/TreePosStore';
+import { DialogContextProvider } from './AppStores/DialogContext';
+import { CurrentLayerContextProvider } from './AppStores/CurrentLayerContext';
+import { LayerInfoStoreProvider } from './AppStores/LayerInfoStore';
 
 function App() {
   const classes = useStyles();
 
-  // Get window dimensions
-  console.log(window.screen)
-
   return (
-
     <div className={classes.app}>
-      <CardPosStoreProvider>
-        <TensorShow/>
-      </CardPosStoreProvider>
+     
+      <TreePosStoreProvider>
+      <CurrentLayerContextProvider>
+      <DialogContextProvider>
+      <LayerInfoStoreProvider>
+      
+          <TensorShow/>
+
+      </LayerInfoStoreProvider>
+      </DialogContextProvider>
+      </CurrentLayerContextProvider>
+      </TreePosStoreProvider>
+
    </div>
   );
 }
