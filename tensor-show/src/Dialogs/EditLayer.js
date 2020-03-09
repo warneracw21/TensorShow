@@ -12,7 +12,7 @@ import {
 	Button } from '@material-ui/core';
 
 // Import Contexts
-import { useTreePosStoreDispatch } from '../AppStores/TreePosStore';
+import { useTreePosStoreState, useTreePosStoreDispatch } from '../AppStores/TreePosStore';
 import { useDialogState, useDialogDispatch } from '../AppStores/DialogContext';
 import { useCurrentLayerState } from '../AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from '../AppStores/LayerInfoStore';
@@ -51,6 +51,7 @@ export default function EditLayer() {
 	const new_hash = currentLayerState.hash;
 	const sender_pos = currentLayerState.sender_pos;
 
+	const treePosState = useTreePosStoreState();
 	const treePosDispatch = useTreePosStoreDispatch();
 
 	const layerInfoStoreState = useLayerInfoStoreState();
@@ -59,13 +60,22 @@ export default function EditLayer() {
 	const handleSave = (event) => {
 		event.preventDefault();
 
+		// Calculate sender connection position
+		var tree = treePosState;
+		console.log(sender_pos)
+		var parent = tree.rows[sender_pos.row].groups[sender_pos.group].slots[sender_pos.slot];
+		console.log(tree)
+		const connection_pos = parent.active_connections.length;
+		console.log(connection_pos)
+
+		let new_sender_pos = {...sender_pos, connection: connection_pos}
+
 		console.log("Sending Dispatch Signal")
 		// Step 2) Register new layer to layer_tree with associated hash (for retrieval)
 		treePosDispatch({
 			type: 'add_child', 
-			sender_pos: sender_pos, 
-			hash: new_hash, 
-			current_hash_keys: Object.keys(layerInfoStoreState)
+			sender_pos: new_sender_pos, 
+			hash: new_hash,
 		});
 		console.log("Ending Dispatch Signal")
 

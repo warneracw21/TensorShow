@@ -29,7 +29,6 @@ export default function LayerTree() {
   const currentLayerDispatch = useCurrentLayerDispatch();
 
   const layerInfoStoreState = useLayerInfoStoreState();
-  console.log(layerInfoStoreState)
 
   // Initialize Data Structure on UseEffect launch
   React.useEffect(() => {
@@ -115,7 +114,6 @@ export default function LayerTree() {
             width: disp.width,
             justifyContent: 'center',
             backgroundColor: "#FF0000",
-            border: '1px solid black'
           }
 
           layer_info = layerInfoStoreState[slot.hash]
@@ -124,7 +122,7 @@ export default function LayerTree() {
               <LayerCardSVG
                 addChild={addChild}
                 editLayer={editLayer}
-                sender_pos={{row: i, group: group_key, slot: k}}
+                sender_pos={{row: i, group: group_key, slot: slot_key}}
                 layerName={`${i}${j}${k}`}
               />
             </div>
