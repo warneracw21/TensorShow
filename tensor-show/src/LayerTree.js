@@ -42,7 +42,7 @@ export default function LayerTree() {
     // Step 1 (Create Hash)
     // const hash = Base64.stringify(sha256(new Date, Math.random()*10000000));
     const hash = Math.random()*1000000;
-    console.log(hash)
+    // console.log(hash)
 
     // Step 2 (Set currently selected Layer to hash)
     currentLayerDispatch({hash: hash, sender_pos: sender_pos});

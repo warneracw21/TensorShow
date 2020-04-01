@@ -62,22 +62,21 @@ export default function EditLayer() {
 
 		// Calculate sender connection position
 		var tree = treePosState;
-		console.log(sender_pos)
 		var parent = tree.rows[sender_pos.row].groups[sender_pos.group].slots[sender_pos.slot];
-		console.log(tree)
+		// console.log(tree)
 		const connection_pos = parent.active_connections.length;
-		console.log(connection_pos)
+		// console.log(connection_pos)
 
 		let new_sender_pos = {...sender_pos, connection: connection_pos}
 
-		console.log("Sending Dispatch Signal")
+		// console.log("Sending Dispatch Signal")
 		// Step 2) Register new layer to layer_tree with associated hash (for retrieval)
 		treePosDispatch({
 			type: 'add_child', 
 			sender_pos: new_sender_pos, 
 			hash: new_hash,
 		});
-		console.log("Ending Dispatch Signal")
+		// console.log("Ending Dispatch Signal")
 
 		// Step 1) Register layerID and layer_info to LayerInfoStore
 		layerInfoStoreDispatch({type: 'add', layerID: new_hash, layer_info: {layer_name: 'layer1'}})
