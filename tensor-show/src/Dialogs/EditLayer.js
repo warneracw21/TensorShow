@@ -57,7 +57,7 @@ export default function EditLayer() {
 	const layerInfoStoreState = useLayerInfoStoreState();
 	const layerInfoStoreDispatch = useLayerInfoStoreDispatch();
 
-	const handleSave = (event) => {
+	const handleAdd = (event) => {
 		event.preventDefault();
 
 		// Calculate sender connection position
@@ -82,6 +82,17 @@ export default function EditLayer() {
 		layerInfoStoreDispatch({type: 'add', layerID: new_hash, layer_info: {layer_name: 'layer1'}})
 		
 		// Step 3) Close Dialoge
+		dialogDispatch(false);
+
+	}
+
+	const handleDelete = (event) => {
+
+		treePosDispatch({
+			type: 'delete_node', 
+			sender_pos: sender_pos
+		});
+
 		dialogDispatch(false);
 
 	}
@@ -113,8 +124,11 @@ export default function EditLayer() {
         <Button onClick={handleCancel} color="primary">
           Cancel
         </Button>
-        <Button onClick={handleSave} color="primary">
-          Save
+        <Button onClick={handleAdd} color="primary">
+          Add
+        </Button>
+        <Button onClick={handleDelete} color="primary">
+        	Delete 
         </Button>
       </DialogActions>
 		</Dialog>

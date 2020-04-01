@@ -67,8 +67,6 @@ const updateRow= (tree, row_pos) => {
   // Set the row width to the running total of the group offsets
   tree.rows[row_pos].disp.width = running_offset;
 
-  console.log(JSON.parse(JSON.stringify(tree)))
-
   return tree;
 
 }
@@ -154,14 +152,87 @@ const propogateWidth = (PositionTree, row_position) => {
   return propogateWidth(new_tree, parent_row_pos); 
 }
 
+const deleteNode = (tree, row_pos, group_key) => {
+
+  // 1) Iterate over slots in group
+  // 2) Calculate next group key
+  // 3) Check if next group exists:
+  //    a) Yes, delete next node
+  //    b) No, call deleteNode on next group
+
+  var slot_key_ind, slot_key;
+  var next_group_key;
+
+
+  // Check if row is undefined
+  if (tree.rows[row_pos] === undefined) {
+    return
+  }
+
+  // Check if group is undefiend
+  if (tree.rows[row_pos].groups[group_key] === undefined) {
+    return;
+  }
+
+  const slot_keys = Object.keys(tree.rows[row_pos].groups[group_key].slots);
+  if (slot_keys === undefined) {
+    return;
+  }
+
+  // Iterate over the slots in this group
+  for (slot_key_ind=0; slot_key_ind<slot_keys.length; slot_key_ind++) {
+    slot_key = slot_keys[slot_key_ind];
+
+    // Calculate next group_key
+    next_group_key = `${group_key}${slot_key}`
+
+    // Call recursion (safety checks in place!)
+    deleteNode(tree, row_pos + 1, next_group_key);
+
+    // Delete the slot
+    delete tree.rows[row_pos].groups[group_key].slots[slot_key];
+  }
+
+  // Delete the group when done deleting the slots
+  delete tree.rows[row_pos].groups[group_key]
+
+}
 
 
 const TreePosReducer = (state, action) => {
 
   switch (action.type) {
     case ('init'): {
-      console.log("INITIALIZATION")
+      console.log("INIT TREE")
       return state;
+    }
+
+    case ('delete_node'): {
+      console.log("DELETE NODE")
+
+      var new_state = {...state};
+
+      const sender_row = action.sender_pos.row;
+      const sender_group = action.sender_pos.group;
+      const sender_slot = action.sender_pos.slot;
+
+      const maximum_row = Math.max(...Object.keys(state.rows).map(i => parseInt(i, 10)))
+
+      var group_key = `${sender_group}${sender_slot}`;
+
+      // Delete All Children
+      deleteNode(new_state, sender_row + 1, group_key);
+
+      // Delete sender
+      delete new_state.rows[sender_row].groups[sender_group].slots[sender_slot];
+
+      new_state = propogateWidth(
+        {...new_state}, 
+        maximum_row, 
+      );
+
+      return new_state;
+
     }
     
     case ('add_child'): {
