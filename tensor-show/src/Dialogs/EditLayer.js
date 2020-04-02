@@ -36,6 +36,10 @@ const getLayerOptions = (parent_layer_type) => {
 	}
 }
 
+function onlyUnique(value, index, self) { 
+    return self.indexOf(value) === index;
+}
+
 export default function EditLayer() {
 
 	// Necessary Information
@@ -63,9 +67,20 @@ export default function EditLayer() {
 		// Calculate sender connection position
 		var tree = treePosState;
 		var parent = tree.rows[sender_pos.row].groups[sender_pos.group].slots[sender_pos.slot];
-		// console.log(tree)
-		const connection_pos = parent.active_connections.length;
-		// console.log(connection_pos)
+
+		var active_connections = parent.active_connections;
+		active_connections = active_connections.filter( onlyUnique ); 
+
+		const connection_pos = active_connections.length;
+
+		////////////////////////////////////
+		// LIMIT ACTIVE CONNECTIONS TO N=5
+		////////////////////////////////////
+		if (connection_pos > 4) {
+			alert("Limit Number of Connections Exceeded (N = 5)");
+			dialogDispatch(false);
+			return;
+		}
 
 		let new_sender_pos = {...sender_pos, connection: connection_pos}
 

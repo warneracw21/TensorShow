@@ -28,6 +28,7 @@ const updateRow= (tree, row_pos) => {
   ////////////////////////////////////////////////////////////////////////
   // Iterate over groups in row
   group_keys = Object.keys(tree.rows[row_pos].groups);
+  group_keys.sort()
   var running_width;
   for (group_key_ind=0; group_key_ind<group_keys.length; group_key_ind++) {
     running_width = 0;
@@ -51,6 +52,7 @@ const updateRow= (tree, row_pos) => {
 
   // Iterate over groups in row
   group_keys = Object.keys(tree.rows[row_pos].groups);
+  group_keys.sort()
   for (group_key_ind=0; group_key_ind<group_keys.length; group_key_ind++) {
     group_key = group_keys[group_key_ind];
 
@@ -94,14 +96,15 @@ const propogateWidth = (PositionTree, row_position) => {
   // 1) Update Child Slot Offsets
   ////////////////////////////////////////////////////////////////////////
   // Update slot offsets (iterate over slot widths)
-  const child_group_keys = Object.keys(new_tree.rows[child_row_pos].groups);
+  var child_group_keys = Object.keys(new_tree.rows[child_row_pos].groups);
+  child_group_keys.sort()
 
   // Iterate over groups in child row
   var running_offset;
   for (group_key_ind=0; group_key_ind<child_group_keys.length; group_key_ind++) {
     running_offset = 0;
     group_key = child_group_keys[group_key_ind];
-    slot_keys = Object.keys(new_tree.rows[child_row_pos].groups[group_key].slots)
+    slot_keys = Object.keys(new_tree.rows[child_row_pos].groups[group_key].slots).sort()
 
     for (slot_key_ind=0; slot_key_ind<slot_keys.length; slot_key_ind++) {
       slot_key = slot_keys[slot_key_ind];
@@ -154,27 +157,23 @@ const propogateWidth = (PositionTree, row_position) => {
 
 const deleteNode = (tree, row_pos, group_key) => {
 
-  // 1) Iterate over slots in group
-  // 2) Calculate next group key
-  // 3) Check if next group exists:
-  //    a) Yes, delete next node
-  //    b) No, call deleteNode on next group
 
+  var group_key_ind, tmp_group_key;
   var slot_key_ind, slot_key;
   var next_group_key;
 
 
-  // Check if row is undefined
+  // Check if row is undefined (Previous Node was Leaf)
   if (tree.rows[row_pos] === undefined) {
     return
   }
 
-  // Check if group is undefiend
+  // Check if group is undefiend (Previous Node was Leaf)
   if (tree.rows[row_pos].groups[group_key] === undefined) {
     return;
   }
 
-  const slot_keys = Object.keys(tree.rows[row_pos].groups[group_key].slots);
+  var slot_keys = Object.keys(tree.rows[row_pos].groups[group_key].slots).sort();
   if (slot_keys === undefined) {
     return;
   }
@@ -193,8 +192,32 @@ const deleteNode = (tree, row_pos, group_key) => {
     delete tree.rows[row_pos].groups[group_key].slots[slot_key];
   }
 
-  // Delete the group when done deleting the slots
-  delete tree.rows[row_pos].groups[group_key]
+  // Delete the group
+  delete tree.rows[row_pos].groups[group_key];
+
+  // Check if row needs to be deleted
+  var delete_row = true;
+  const group_keys = Object.keys(tree.rows[row_pos].groups)
+  for (group_key_ind=0; group_key_ind<group_keys.length; group_key_ind++) {
+    tmp_group_key = group_keys[group_key_ind];
+
+    slot_keys = Object.keys(tree.rows[row_pos].groups[tmp_group_key].slots) 
+    for (slot_key_ind=0; slot_key_ind<slot_keys.length; slot_key_ind++) {
+      slot_key = slot_keys[slot_key_ind];
+
+      if (tree.rows[row_pos].groups[tmp_group_key].slots[slot_key].render) {
+        delete_row = false
+      }
+    }
+  }
+
+  ///////////////
+  // Delete the row
+  ///////////////
+  if (delete_row) {
+    console.log("DELETE ROW:", row_pos)
+    delete tree.rows[row_pos]
+  }
 
 }
 
@@ -216,16 +239,18 @@ const TreePosReducer = (state, action) => {
       const sender_group = action.sender_pos.group;
       const sender_slot = action.sender_pos.slot;
 
-      const maximum_row = Math.max(...Object.keys(state.rows).map(i => parseInt(i, 10)))
-
+      
+      // Calculate the first child group key
       var group_key = `${sender_group}${sender_slot}`;
 
       // Delete All Children
       deleteNode(new_state, sender_row + 1, group_key);
 
       // Delete sender
-      delete new_state.rows[sender_row].groups[sender_group].slots[sender_slot];
+      delete new_state.rows[sender_row].groups[sender_group].slots[sender_slot]
 
+      // Propogate Changes
+      const maximum_row = Math.max(...Object.keys(new_state.rows).map(i => parseInt(i, 10)))
       new_state = propogateWidth(
         {...new_state}, 
         maximum_row, 
@@ -259,6 +284,9 @@ const TreePosReducer = (state, action) => {
       const child_row_pos = parent_row_pos + 1;
       const child_group_pos = `${parent_group_pos}${parent_slot_pos}`;
       const child_slot_pos = action.sender_pos.connection;
+
+      console.log("Parent Position:", parent_row_pos, parent_group_pos, parent_slot_pos)
+      console.log("Child Position:", child_row_pos, child_group_pos, child_slot_pos)
 
 
       //////////////////////////////////////////////////////
@@ -297,14 +325,14 @@ const TreePosReducer = (state, action) => {
       for (var i=0; i<parent_row_keys.length - 1; i++) {
         parent_row_key = parseInt(parent_row_keys[i], 10);
         tmp_parent_row = new_state.rows[parent_row_key];
-        parent_group_keys = Object.keys(tmp_parent_row.groups)
+        parent_group_keys = Object.keys(tmp_parent_row.groups).sort()
 
 
         // Iterate over Parent Group Keys
         for (var j=0; j<parent_group_keys.length; j++) {
           parent_group_key = parent_group_keys[j];
           tmp_parent_group = new_state.rows[parent_row_key].groups[parent_group_key];
-          parent_slot_keys = Object.keys(tmp_parent_group.slots)
+          parent_slot_keys = Object.keys(tmp_parent_group.slots).sort()
 
           // Iterate over slot keys in the parent group
           for (var k=0; k<parent_slot_keys.length; k++) {
@@ -313,9 +341,9 @@ const TreePosReducer = (state, action) => {
             
             // Calculate Group Key ROW|GROUP|SLOT
             group_key = `${parent_group_key}${parent_slot_key}`;
-            console.log(parent_row_key, parent_group_key, parent_slot_key)
-            console.log(group_key)
-            console.log(JSON.parse(JSON.stringify(new_state)))
+            // console.log(parent_row_key, parent_group_key, parent_slot_key)
+            // console.log(group_key)
+            // console.log(JSON.parse(JSON.stringify(new_state)))
 
             // Check if this key is in the child row's groups
             // // We do not want to create a new group if we do not have to
@@ -381,10 +409,12 @@ const TreePosReducer = (state, action) => {
       //////////////////////////////////////////////////////
       // Add Child Node to State
       //////////////////////////////////////////////////////
-      new_state.rows[child_row_pos].groups[child_group_pos].slots[child_slot_pos] = slot
+        new_state.rows[child_row_pos].groups[child_group_pos].slots[child_slot_pos] = slot
+        new_state.rows[parent_row_pos].groups[parent_group_pos].slots[parent_slot_pos].active_connections.push(child_slot_pos)
+      
 
       // Add the child connection position to parent
-      new_state.rows[parent_row_pos].groups[parent_group_pos].slots[parent_slot_pos].active_connections.push(child_slot_pos)
+      
 
 
       //////////////////////////////////////////////////////
@@ -395,6 +425,8 @@ const TreePosReducer = (state, action) => {
         parent_row_keys.length - 1, 
       );
       
+                  console.log(JSON.parse(JSON.stringify(new_state)))
+
       return new_state
 
     }

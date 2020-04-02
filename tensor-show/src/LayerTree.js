@@ -105,29 +105,38 @@ export default function LayerTree() {
         disp = slot.disp;
 
         // Render or placeholder
-        if (slot.render) {
-          style = {
-            position: 'absolute',
-            top: disp.y,
-            left: disp.x,
-            height: disp.height,
-            width: disp.width,
-            justifyContent: 'center',
-            backgroundColor: "#FF0000",
-          }
+        
+        style = {
+          position: 'absolute',
+          top: disp.y,
+          left: disp.x,
+          height: disp.height,
+          width: disp.width,
+          textAlign: 'center',
+          backgroundColor: "#FF0000",
+        }
 
+        if (slot.render) {
           layer_info = layerInfoStoreState[slot.hash]
           slot_svg = (
             <div style={style} key={`${row_key}${group_key}${slot_key}`}>
+              <div>
               <LayerCardSVG
                 addChild={addChild}
                 editLayer={editLayer}
                 sender_pos={{row: i, group: group_key, slot: slot_key}}
-                layerName={`${i}${j}${k}`}
+                layerName={`${group_key}${slot_key}`}
               />
+              </div>
             </div>
             )
           slot_svgs.push(slot_svg)
+        } else {
+          slot_svgs.push(
+            <div  style={{...style, backgroundColor: '#FFFF89'}}>
+            {`${group_key}${slot_key}`}
+            </div>
+          )
         }
       }
 
