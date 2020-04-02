@@ -13,7 +13,7 @@ export default function LayerCardSVG(params) {
 
 
   return (
-    <svg x={0} y={0} width="210px" height="210px" version="1.1" xmlnsXlink="http://www.w3.org/1999/xlink">
+    <svg x={params.x} y={params.y} width="210px" height="210px" version="1.1" xmlnsXlink="http://www.w3.org/1999/xlink">
       <defs>
           <linearGradient x1="47.0796717%" y1="83.3533249%" x2="27.04726%" y2="185.215584%" id="linearGradient-1">
               <stop stopColor="#FFFFFF" offset="0%"></stop>

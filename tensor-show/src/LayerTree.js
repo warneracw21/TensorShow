@@ -120,15 +120,15 @@ export default function LayerTree() {
           layer_info = layerInfoStoreState[slot.hash]
           slot_svg = (
             <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-              <div>
               <LayerCardSVG
+                x={disp.x}
+                y={disp.y}
                 addChild={addChild}
                 editLayer={editLayer}
                 sender_pos={{row: i, group: group_key, slot: slot_key}}
                 layerName={`${group_key}${slot_key}`}
               />
               </div>
-            </div>
             )
           slot_svgs.push(slot_svg)
         } else {
