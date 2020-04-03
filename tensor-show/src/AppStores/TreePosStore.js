@@ -226,13 +226,12 @@ const TreePosReducer = (state, action) => {
 
   switch (action.type) {
     case ('init'): {
-      console.log("INIT TREE")
       return state;
     }
 
     case ('delete_node'): {
-      console.log("DELETE NODE")
 
+      // Make deep copy of old state
       var new_state = {...state};
 
       const sender_row = action.sender_pos.row;
@@ -261,7 +260,6 @@ const TreePosReducer = (state, action) => {
     }
     
     case ('add_child'): {
-      console.log("ADDING CHILD")
 
       // Make deep copy of old state
       var new_state = {...state};
@@ -285,15 +283,10 @@ const TreePosReducer = (state, action) => {
       const child_group_pos = `${parent_group_pos}${parent_slot_pos}`;
       const child_slot_pos = action.sender_pos.connection;
 
-      console.log("Parent Position:", parent_row_pos, parent_group_pos, parent_slot_pos)
-      console.log("Child Position:", child_row_pos, child_group_pos, child_slot_pos)
-
-
       //////////////////////////////////////////////////////
       // Are we adding a new row?
       //////////////////////////////////////////////////////
       if (new_state.rows[parent_row_pos + 1] === undefined) {
-        console.log("ADDING NEW ROW")
         new_state.rows[parent_row_pos + 1] = {
           disp: {
             x: 0,
@@ -352,7 +345,6 @@ const TreePosReducer = (state, action) => {
             }
 
             // Add a new group with one slot
-            console.log("ADDING NEW GROUP")
             new_state.rows[parent_row_key + 1].groups[group_key] = {
               disp: {
                 x: 0,
@@ -409,14 +401,9 @@ const TreePosReducer = (state, action) => {
       //////////////////////////////////////////////////////
       // Add Child Node to State
       //////////////////////////////////////////////////////
-        new_state.rows[child_row_pos].groups[child_group_pos].slots[child_slot_pos] = slot
-        new_state.rows[parent_row_pos].groups[parent_group_pos].slots[parent_slot_pos].active_connections.push(child_slot_pos)
+      new_state.rows[child_row_pos].groups[child_group_pos].slots[child_slot_pos] = slot
+      new_state.rows[parent_row_pos].groups[parent_group_pos].slots[parent_slot_pos].active_connections.push(child_slot_pos)
       
-
-      // Add the child connection position to parent
-      
-
-
       //////////////////////////////////////////////////////
       // Propogate changes after adding new slot
       //////////////////////////////////////////////////////
@@ -425,8 +412,6 @@ const TreePosReducer = (state, action) => {
         parent_row_keys.length - 1, 
       );
       
-                  console.log(JSON.parse(JSON.stringify(new_state)))
-
       return new_state
 
     }
