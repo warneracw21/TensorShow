@@ -5,6 +5,7 @@ import React from 'react';
 
 // Import Custom Components
 import LayerCardSVG from './CardSVGs/LayerCardSVG';
+import LayerCard from './CardSVGs/LayerCard';
 import InputCardSVG from './CardSVGs/InputCardSVG';
 import ModelCardSVG from './CardSVGs/ModelCardSVG';
 
@@ -151,7 +152,7 @@ export default function LayerTree() {
             slot_svg = (
               <div style={style} key={`${row_key}${group_key}${slot_key}`}>
                 <LayerCardSVG
-                  layerName={`${group_key}${slot_key}`}
+                  layerName={layer_info.layer_name}
                 />
               </div>
             );
@@ -167,7 +168,7 @@ export default function LayerTree() {
                   addChild={addChild}
                   editLayer={editLayer}
                   sender_pos={{row: i, group: group_key, slot: slot_key}}
-                  layerName={`${group_key}${slot_key}`}
+                  layerName={layer_info.layer_name}
                 />
               </div>
             );

@@ -33,7 +33,7 @@ import {
 /////////////////////////////////////////////////
 import { useTreePosStoreState, useTreePosStoreDispatch } from '../AppStores/TreePosStore';
 import { useDialogState, useDialogDispatch } from '../AppStores/DialogContext';
-import { useCurrentLayerState } from '../AppStores/CurrentLayerContext';
+import { useCurrentLayerState, useCurrentLayerDispatch } from '../AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from '../AppStores/LayerInfoStore';
 const NextLayerTypeContext = React.createContext(null);
 const NextLayerParamsContext = React.createContext(null);
@@ -105,6 +105,7 @@ export default function EditLayer() {
 	const dialogDispatch = useDialogDispatch();
 
 	const currentLayerState = useCurrentLayerState();
+	const currentLayerDispatch = useCurrentLayerDispatch();
 
 	const treePosState = useTreePosStoreState();
 	const treePosDispatch = useTreePosStoreDispatch();
@@ -123,6 +124,9 @@ export default function EditLayer() {
 	const sender_layer_name = sender_info.layer_name
 	const sender_layer_type = sender_info.layer_type
 	const sender_layer_params = sender_info.layer_params;
+	const parent_pos = sender_info.parent_pos;
+
+	console.log(sender_pos, parent_pos)
 
 	////////////////////////////////////////////////
 	// Establish Dialog Hooks for storing Layer Info
@@ -180,6 +184,7 @@ export default function EditLayer() {
 			layer_info: {
 				layer_name: nextLayerName,
 				layer_type: nextLayerType,
+				parent_pos: sender_pos,
 				layer_params: next_layer_params
 			}
 		})
@@ -242,7 +247,7 @@ export default function EditLayer() {
 		}
 
 		layerInfoStoreDispatch({
-			type: 'add', 
+			type: 'update', 
 			layerID: sender_pos_key, 
 			layer_info: {
 				layer_name: nextLayerName,
@@ -265,6 +270,13 @@ export default function EditLayer() {
 		});
 
 		// Delete Sender Node Information from Info Store
+		layerInfoStoreDispatch({
+			type: 'delete',
+			layerID: sender_pos_key
+		})
+
+		// Set currentLayer to parent
+		currentLayerDispatch({sender_pos: parent_pos});
 
 		// Close Dialog
 		dialogDispatch({open: false});
@@ -355,7 +367,7 @@ export default function EditLayer() {
 	        variant="outlined"
 	        helperText="X Stride"
 	        value={strideX}
-	        onChange={(event) => setStrideX(event.value.target)}
+	        onChange={(event) => setStrideX(event.target.value)}
 	      />
        	<TextField
        		className={classes.paramTextField}
@@ -366,7 +378,7 @@ export default function EditLayer() {
 	        variant="outlined"
 	        helperText="Y Stride"
 	        value={strideY}
-	        onChange={(event) => setStrideY(event.value.target)}
+	        onChange={(event) => setStrideY(event.target.value)}
 	      />
 	     </div>
 		</div>
