@@ -1,24 +1,27 @@
+/////////////////////////////////////////////////
+// Layer Tree
+/////////////////////////////////////////////////
 import React from 'react';
 
 // Import Custom Components
 import LayerCardSVG from './LayerCardSVG';
 
-// Import Contexts
+/////////////////////////////////////////////////
+// Set Up Contexts
+/////////////////////////////////////////////////
 import { useTreePosStoreState, useTreePosStoreDispatch } from '../AppStores/TreePosStore';
 import { useDialogDispatch } from '../AppStores/DialogContext';
 import { useCurrentLayerDispatch } from '../AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState } from '../AppStores/LayerInfoStore';
 
 ///////////////////////////////////////////////////////////
-// TensorShow App
+// LayerTree
 ///////////////////////////////////////////////////////////
-const dpi = window.devicePixelRatio;
-console.log(dpi)
-
-
 export default function LayerTree() {
 
-  // Enter into CardPosContext
+  ////////////////////////////////////////////////
+  // Subscribe to Tree Contexts
+  ////////////////////////////////////////////////
   const cardPosState = useTreePosStoreState();
   const cardPosDispatch = useTreePosStoreDispatch();
 
@@ -27,38 +30,33 @@ export default function LayerTree() {
 
   const layerInfoStoreState = useLayerInfoStoreState();
 
-  // Initialize Data Structure on UseEffect launch
-  React.useEffect(() => {
-    cardPosDispatch({type: 'init'})
-  }, [])
-
+  ////////////////////////////////////////////////
+  // Add Child
+  ////////////////////////////////////////////////
   const addChild = (event, sender_pos) => {
     event.preventDefault()
     
-
-    // Step 1 (Create Hash)
-    // const hash = Base64.stringify(sha256(new Date, Math.random()*10000000));
-    // console.log(hash)
-
-    // Step 2 (Set currently selected Layer to hash)
+    // Set the current layer (the sender to dialog)
     currentLayerDispatch({sender_pos: sender_pos});
 
-    // Step 3 (Set dialogDispatch)
+    // Open Dialog
     dialogDispatch({open: true, dialog_type: "add"});
     return;
   }
 
+  ////////////////////////////////////////////////
+  // Edit Layer
+  ////////////////////////////////////////////////
   const editLayer = (event, sender_pos) => {
     event.preventDefault();
+
+    // Set the current layer (the sender to dialog)
     currentLayerDispatch({sender_pos: sender_pos});
 
+    // Open Dialog
     dialogDispatch({open: true, dialog_type: "edit"})
   }
 
-  /////////////////////////////////////////////////////////
-  // REMEMBER: cardPosState keys are all integers, 
-  // so it is more precise to iterate in order
-  /////////////////////////////////////////////////////////
 
   // Iterate over the cardPosState
   let style;
@@ -110,7 +108,6 @@ export default function LayerTree() {
         disp = slot.disp;
 
         // Render or placeholder
-        
         style = {
           position: 'absolute',
           top: disp.y,
@@ -118,7 +115,6 @@ export default function LayerTree() {
           height: disp.height,
           width: disp.width,
           textAlign: 'center',
-          // backgroundColor: "#FF0000",
         }
 
         if (slot.render) {
@@ -247,9 +243,13 @@ export default function LayerTree() {
   )
 
   return (
-    <div style={{position: "absolute", width: "98%", height:"98%"}}>
-    {canvas_elements}
-    {TreeSVG}
+    <div style={{
+      position: "absolute", 
+      width: "98%", 
+      height:"98%"
+    }}>
+      {canvas_elements}
+      {TreeSVG}
     </div>
     )
 }
