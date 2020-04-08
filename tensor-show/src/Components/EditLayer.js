@@ -1,3 +1,6 @@
+/////////////////////////////////////////////////
+// Edit Layer
+/////////////////////////////////////////////////
 import React from 'react';
 
 // Import Styling Tools
@@ -24,13 +27,21 @@ import {
 	Checkbox,
 	Button } from '@material-ui/core';
 
-// Import Contexts
+
+/////////////////////////////////////////////////
+// Set Up Contexts
+/////////////////////////////////////////////////
 import { useTreePosStoreState, useTreePosStoreDispatch } from '../AppStores/TreePosStore';
 import { useDialogState, useDialogDispatch } from '../AppStores/DialogContext';
 import { useCurrentLayerState } from '../AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from '../AppStores/LayerInfoStore';
+const NextLayerTypeContext = React.createContext(null);
+const NextLayerParamsContext = React.createContext(null);
 
+
+/////////////////////////////////////////////////
 // Declare Constants
+/////////////////////////////////////////////////
 const useStyles = makeStyles((theme) => ({
 	layerNameTextField: {
 		margin: theme.spacing(1),
@@ -55,10 +66,6 @@ const layer_type_map = {
 	"pool_layer": "Pooling",
 	"full_layer": "Fully Connected"
 }
-
-// Declare Contexts
-const NextLayerTypeContext = React.createContext(null);
-const NextLayerParamsContext = React.createContext(null);
 
 
 ////////////////////////////////////////////////
@@ -85,36 +92,41 @@ function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 
+////////////////////////////////////////////////
+// Edit Layer
+////////////////////////////////////////////////
 export default function EditLayer() {
 	const classes = useStyles();
 
-	// Necessary Information
-	// 1) LayerID (where do we store the new information)
-	// 2) Layer Information (do we start from scratch or is there old information to update)
-	// 3) Parent Type (this is how we limit what options the next layer can be)
-
-	// Enter into the context of this dialog
+	////////////////////////////////////////////////
+	// Subscribe to Contexts for this Dialog
+	////////////////////////////////////////////////
 	const {open, dialog_type} = useDialogState();
 	const dialogDispatch = useDialogDispatch();
 
 	const currentLayerState = useCurrentLayerState();
-	const sender_pos = currentLayerState.sender_pos;
-	const sender_pos_key = `${sender_pos.row}${sender_pos.group}${sender_pos.slot}`
 
 	const treePosState = useTreePosStoreState();
 	const treePosDispatch = useTreePosStoreDispatch();
 
 	const layerInfoStoreState = useLayerInfoStoreState();
 	const layerInfoStoreDispatch = useLayerInfoStoreDispatch();
+
+	////////////////////////////////////////////////
+	// Calculate Sender Information
+	////////////////////////////////////////////////
+	const sender_pos = currentLayerState.sender_pos;
+	const sender_pos_key = `${sender_pos.row}${sender_pos.group}${sender_pos.slot}`
 	const sender_info = layerInfoStoreState[sender_pos_key]
 
 	// Get information for Dialog
 	const sender_layer_name = sender_info.layer_name
 	const sender_layer_type = sender_info.layer_type
 	const sender_layer_params = sender_info.layer_params;
-	console.log(sender_layer_name, sender_layer_type, sender_layer_params)
 
-	// Set up Dialog Content for next layer
+	////////////////////////////////////////////////
+	// Establish Dialog Hooks for storing Layer Info
+	////////////////////////////////////////////////
 	const next_layer_options = getNextLayerOptions(sender_layer_type)
 	const [nextLayerName, setNextLayerName] = React.useState("New Layer")
 	const [nextLayerType, setNextLayerType] = React.useState(next_layer_options[0])
@@ -127,34 +139,22 @@ export default function EditLayer() {
 		event.preventDefault();
 
 		// Calculate sender connection position
-		var tree = treePosState;
-		var parent = tree.rows[sender_pos.row].groups[sender_pos.group].slots[sender_pos.slot];
+		const tree = treePosState;
+		const parent = tree.rows[sender_pos.row].groups[sender_pos.group].slots[sender_pos.slot];
 
 		var active_connections = parent.active_connections;
 		active_connections = active_connections.filter( onlyUnique ); 
 
 		const connection_pos = active_connections.length;
+		const new_sender_pos = {...sender_pos, connection: connection_pos}
 
-		////////////////////////////////////
-		// LIMIT ACTIVE CONNECTIONS TO N=5
-		////////////////////////////////////
-		if (connection_pos > 4) {
-			alert("Limit Number of Connections Exceeded (N = 5)");
-			dialogDispatch(false);
-			return;
-		}
-
-		let new_sender_pos = {...sender_pos, connection: connection_pos}
-
-		// console.log("Sending Dispatch Signal")
-		// Step 2) Register new layer to layer_tree with associated hash (for retrieval)
+		// Add Child Position to Position Tree
 		treePosDispatch({
 			type: 'add_child', 
 			sender_pos: new_sender_pos, 
 		});
-		// console.log("Ending Dispatch Signal")
 
-		// Step 1) Register layerID and layer_info to LayerInfoStore
+		// ADD Layer Information to LayerInfoStore
 		const new_layer_pos_key = `${sender_pos.row + 1}${sender_pos.group}${sender_pos.slot}${connection_pos}`
 		
 		let next_layer_params;
@@ -183,7 +183,7 @@ export default function EditLayer() {
 			}
 		})
 		
-		// Step 3) Close Dialog
+		// Close Dialog
 		dialogDispatch({open: false});
 
 	}
@@ -191,6 +191,7 @@ export default function EditLayer() {
 	const handleSave = (event) => {
 		event.preventDefault();
 
+		// UPDATE Layer Information to LayerInfoStore
 		let next_layer_params;
 		switch (nextLayerType) {
 			case "conv_layer": {
@@ -216,27 +217,35 @@ export default function EditLayer() {
 				layer_params: next_layer_params
 			}
 		})
+
+		// Close Dialog
 		dialogDispatch({open: false});
 	}
 
 	const handleDelete = (event) => {
 		event.preventDefault();
 
+		// Delete Sender Node Position from Position Tree
 		treePosDispatch({
 			type: 'delete_node', 
 			sender_pos: sender_pos
 		});
+
+		// Delete Sender Node Information from Info Store
+
+		// Close Dialog
 		dialogDispatch({open: false});
 	}
 
 	const handleCancel = (event) => {
 		event.preventDefault();
 
+		// Close Dialog
 		dialogDispatch({open: false});
 	}
 
 	///////////////////////////////////////////////////////
-	// Layer Parameters
+	// Handle Changes of Layer Information
 	///////////////////////////////////////////////////////
 	const handleChangeNextLayerName = event => {
 		setNextLayerName(event.target.value)
@@ -548,15 +557,21 @@ export default function EditLayer() {
 	// Setup Default Parameters
 	///////////////////////////////////////////////////////
 	React.useEffect(() => {
+
+		// In Edit Mode -> set layer name to saved layer name
 		if (dialog_type === 'edit') {
 			setNextLayerName(sender_layer_name)
 			setNextLayerType(sender_layer_type)
+
+		// In Add Mode -> set layer name to default value
 		} else {
 			setNextLayerName("New Layer")
 			setNextLayerType(next_layer_options[0])
 		}
 
 		if (dialog_type === 'edit') {
+
+			// In Convolution and Pooling Layer -> Set window and stride info
 			if ((sender_layer_type === 'conv_layer') | (sender_layer_type === 'pool_layer')) {
 				setWindowWidth(sender_layer_params.window.width);
 				setWindowHeight(sender_layer_params.window.height);
@@ -564,13 +579,18 @@ export default function EditLayer() {
 				setStrideX(sender_layer_params.stride.x)
 				setStrideY(sender_layer_params.stride.y)
 
+				// In Convolution Type -> Set Activation and Regularization
 				if (sender_layer_type === 'conv_layer') {
 					setActivationType(sender_layer_params.activation)
 					setRegularizationType(sender_layer_params.regularization)
+
+				// In Pooling Type -> Set Activation and Regularization
 				} else {
 					setPoolingType(sender_layer_params.pooling)
 				}
 			}
+
+			// In Dense Type -> Set Output, Last Layer, Acrtivation and Regularization
 			else if (sender_layer_type === 'full_layer') {
 				setOutputUnits(sender_layer_params.output.units)
 				setLastLayer(sender_layer_params.last_layer)
@@ -578,6 +598,8 @@ export default function EditLayer() {
 				setRegularizationType(sender_layer_params.regularization)
 			}
 		}
+
+	// Run on Dialog open
 	}, [open])
 
 
@@ -619,8 +641,3 @@ export default function EditLayer() {
 		</Dialog>
 	)
 }
-
-
-
-
-
