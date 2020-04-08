@@ -4,7 +4,9 @@
 import React from 'react';
 
 // Import Custom Components
-import LayerCardSVG from './LayerCardSVG';
+import LayerCardSVG from './CardSVGs/LayerCardSVG';
+import InputCardSVG from './CardSVGs/InputCardSVG';
+import ModelCardSVG from './CardSVGs/ModelCardSVG';
 
 /////////////////////////////////////////////////
 // Set Up Contexts
@@ -118,25 +120,62 @@ export default function LayerTree() {
         }
 
         if (slot.render) {
-          layer_info = layerInfoStoreState[slot.hash]
-          slot_svg = (
-            <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-              <LayerCardSVG
-                x={disp.x}
-                y={disp.y}
-                addChild={addChild}
-                editLayer={editLayer}
-                sender_pos={{row: i, group: group_key, slot: slot_key}}
-                layerName={`${group_key}${slot_key}`}
-              />
+          layer_info = layerInfoStoreState[`${row_key}${group_key}${slot_key}`]
+          console.log(`${row_key}${group_key}${slot_key}`)
+          console.log(layer_info)
+          
+          // Add Input Card
+          if (layer_info.layer_type === "input_layer") {
+            slot_svg = (
+              <div style={style} key={`${row_key}${group_key}${slot_key}`}>
+                <InputCardSVG
+                  sender_pos={{row: i, group: group_key, slot: slot_key}}
+                  layer_info={layer_info}
+                  addChild={addChild}
+                  sender_pos={{row: i, group: group_key, slot: slot_key}}
+                />
               </div>
-            )
+            );
+
+          // Add Model Card
+          } else if (layer_info.layer_type === "model") {
+            slot_svg = (
+              <div style={style} key={`${row_key}${group_key}${slot_key}`}>
+                <ModelCardSVG/>
+              </div>
+            );
+
+
+          // Add layer card without Add Layer
+          } else if ((layer_info.layer_type === "full_layer") & (layer_info.layer_params.last_layer)) {
+            slot_svg = (
+              <div style={style} key={`${row_key}${group_key}${slot_key}`}>
+                <LayerCardSVG
+                  layerName={`${group_key}${slot_key}`}
+                />
+              </div>
+            );
+          } 
+
+
+          else {
+
+          // Add Layer Card
+            slot_svg = (
+              <div style={style} key={`${row_key}${group_key}${slot_key}`}>
+                <LayerCardSVG
+                  addChild={addChild}
+                  editLayer={editLayer}
+                  sender_pos={{row: i, group: group_key, slot: slot_key}}
+                  layerName={`${group_key}${slot_key}`}
+                />
+              </div>
+            );
+          }
           slot_svgs.push(slot_svg)
           
-
           // Check if next row exists
           if (pos_tree.rows[row_key + 1]) {
-
             
             // Instantiate the canvas
             var canv_params = {
