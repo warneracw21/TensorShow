@@ -131,6 +131,7 @@ export default function EditLayer() {
 	const [nextLayerName, setNextLayerName] = React.useState("New Layer")
 	const [nextLayerType, setNextLayerType] = React.useState(next_layer_options[0])
 	const [nextLayerParams, setNextLayerParams] = React.useState({})
+	const [modelName, setModelName] = React.useState("New Model")
 
 	///////////////////////////////////////////////////////
 	// Edit Layer Functionality Methods
@@ -182,6 +183,38 @@ export default function EditLayer() {
 				layer_params: next_layer_params
 			}
 		})
+
+		// Check if Last Layer is added
+		var model_card_position_key;
+		if (lastLayer) {
+
+			// Add Position for Model Card
+			treePosDispatch({
+				type: 'add_child', 
+				sender_pos: {
+					row: sender_pos.row + 1,
+					group: `${sender_pos.group}${sender_pos.slot}`,
+					slot: connection_pos,
+					connection: 0
+				}
+			});
+
+			// Calculate position key of model card
+			model_card_position_key = `${sender_pos.row + 2}${sender_pos.group}${sender_pos.slot}${connection_pos}0`
+			console.log(model_card_position_key)
+			layerInfoStoreDispatch({
+			type: 'add', 
+			layerID: model_card_position_key, 
+			layer_info: {
+				layer_name: modelName,
+				layer_type: "model",
+			}
+		})
+
+
+			// Add Model Card in Layer Info Store
+
+		}
 		
 		// Close Dialog
 		dialogDispatch({open: false});
@@ -370,7 +403,15 @@ export default function EditLayer() {
 	        }
         	label="Last Layer?"
       	/>
-	     </div>
+	    </div>
+   		{lastLayer ? (
+   			<TextField
+					className={classes.layerNameTextField}
+	        label="Model Name"
+	        defaultValue="Default Value"
+	        value={modelName}
+	        onChange={(event) => setModelName(event.target.value)}
+	      />): null}
 		</div>
 	);
 
@@ -557,6 +598,9 @@ export default function EditLayer() {
 	// Setup Default Parameters
 	///////////////////////////////////////////////////////
 	React.useEffect(() => {
+
+		// Always set last layer to false
+		setLastLayer(false);
 
 		// In Edit Mode -> set layer name to saved layer name
 		if (dialog_type === 'edit') {

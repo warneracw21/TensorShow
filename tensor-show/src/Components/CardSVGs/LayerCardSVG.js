@@ -22,7 +22,6 @@ export default function LayerCardSVG(params) {
   const addChild = params.addChild;
   const editLayer = params.editLayer;
 
-
   return (
     <svg width="210px" height="210px" version="1.1" xmlnsXlink="http://www.w3.org/1999/xlink">
       <defs>
@@ -82,10 +81,15 @@ export default function LayerCardSVG(params) {
           <text id="OutputShapeText" fontFamily="Helvetica-Light, Helvetica" fontSize="10" fontWeight="300" fill="#000000">
               <tspan x="87" y="151">{outputShape}</tspan>
           </text>
-          <path d="M142.858491,176 C157.848332,176 170,181.596441 170,188.5 C170,188.667706 169.992829,188.834641 169.97862,189.000742 L170,189 L170,202 L33,202 L33,189 L33.0213798,189.000742 C33.0071711,188.834641 33,188.667706 33,188.5 C33,181.596441 45.1516677,176 60.1415094,176 L142.858491,176 Z" id="Toolbar" fillOpacity="0.4" fill="#000000" onClick={(event) => addChild(event, params.sender_pos)}></path>
-        <text id="AddLayerText" fontFamily="Helvetica-Bold, Helvetica" fontSize="10" fontWeight="bold" fill="#FFFFFF" fillOpacity="0.734238418">
-            <tspan x="75" y="191">Add Layer</tspan>
-        </text>
+          {(addChild !== undefined) ? (
+            <g>
+              <path d="M142.858491,176 C157.848332,176 170,181.596441 170,188.5 C170,188.667706 169.992829,188.834641 169.97862,189.000742 L170,189 L170,202 L33,202 L33,189 L33.0213798,189.000742 C33.0071711,188.834641 33,188.667706 33,188.5 C33,181.596441 45.1516677,176 60.1415094,176 L142.858491,176 Z" id="Toolbar" fillOpacity="0.4" fill="#000000" onClick={(event) => addChild(event, params.sender_pos)}></path>
+              <text id="AddLayerText" fontFamily="Helvetica-Bold, Helvetica" fontSize="10" fontWeight="bold" fill="#FFFFFF" fillOpacity="0.734238418">
+              <tspan x="75" y="191">Add Layer</tspan>
+              </text>
+            </g>): <g/>}
+
+        
       </g>
     </svg>
   )

@@ -18,6 +18,7 @@ export default function InputCardSVG(params) {
   /////////////////////////////////////////////////
   // Methods used in SVG
   /////////////////////////////////////////////////
+  const addChild = params.addChild
 
   return (
     <svg x={params.x} y={params.y} width="210px" height="210px" version="1.1" xmlnsXlink="http://www.w3.org/1999/xlink">
@@ -52,7 +53,7 @@ export default function InputCardSVG(params) {
                 <use fill="black" fillOpacity="1" filter="url(#filter-5)" xlinkHref="#path-4"></use>
                 <use fillOpacity="0.913625437" fill="#FF8105" fillRule="evenodd" style={{mixBlendMode: "darken"}} xlinkHref="#path-4"></use>
             </g>
-            <path d="M142.858491,176 C157.848332,176 170,181.596441 170,188.5 C170,188.667706 169.992829,188.834641 169.97862,189.000742 L170,189 L170,202 L33,202 L33,189 L33.0213798,189.000742 C33.0071711,188.834641 33,188.667706 33,188.5 C33,181.596441 45.1516677,176 60.1415094,176 L142.858491,176 Z" id="Toolbar" fill-opacity="0.4" fill="#000000"></path>
+            <path d="M142.858491,176 C157.848332,176 170,181.596441 170,188.5 C170,188.667706 169.992829,188.834641 169.97862,189.000742 L170,189 L170,202 L33,202 L33,189 L33.0213798,189.000742 C33.0071711,188.834641 33,188.667706 33,188.5 C33,181.596441 45.1516677,176 60.1415094,176 L142.858491,176 Z" id="Toolbar" fillOpacity="0.4" fill="#000000" onClick={(event) => addChild(event, params.sender_pos)}></path>
             <text id="AddLayerText" fontFamily="Helvetica-Bold, Helvetica" fontSize="10" fontWeight="bold" fill="#FFFFFF" fillOpacity="0.734238418">
                 <tspan x="75" y="191">Add Layer</tspan>
             </text>

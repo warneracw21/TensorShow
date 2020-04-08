@@ -18,7 +18,11 @@ const LayerInfoStoreProvider = ({children}) => {
     "000": {
       layer_name: 'Input Layer',
       layer_type: 'input_layer',
-      layer_params: {}
+      layer_params: {
+        dataset_name: "",
+        train_set_shape: "",
+        test_set_shape: ""
+      }
     }
   })
 
