@@ -13,11 +13,20 @@ const LayerInfoStoreProvider = ({children}) => {
         state[[action.layerID]] = action.layer_info;
         return state;
       }
+      case 'delete': {
+        delete state[[action.layerID]];
+        return state;
+      }
+      case 'update': {
+        state[[action.layerID]] = Object.assign({}, state[[action.layerID]], action.layer_info);
+        return state;
+      }
     }
   }, {
     "000": {
       layer_name: 'Input Layer',
       layer_type: 'input_layer',
+      parent_pos: 'root',
       layer_params: {
         dataset_name: "",
         train_set_shape: "",
