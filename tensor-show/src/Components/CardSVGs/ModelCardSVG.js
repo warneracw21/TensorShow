@@ -37,16 +37,16 @@ return (
         </defs>
         <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
             <g id="LayerCardBase">
-                <use fill="black" fill-opacity="1" filter="url(#filter-3)" xlinkHref="#path-2"></use>
+                <use fill="black" fillOpacity="1" filter="url(#filter-3)" xlinkHref="#path-2"></use>
                 <use fill="url(#linearGradient-1)" fillRule="evenodd" xlinkHref="#path-2"></use>
             </g>
             <g id="LayerTitleBox">
                 <use fill="black" fillOpacity="1" filter="url(#filter-5)" xlinkHref="#path-4"></use>
                 <use fillOpacity="0.913625437" fill="#FF8105" fillRule="evenodd" style={{mixBlendMode: "darken"}} xlinkHref="#path-4"></use>
             </g>
-            <path d="M79.3207547,91 C86.2138936,91 91.8222797,95.3383345 91.9958589,100.741896 L92,101 L92,112 L28,112 L28,101 C28,95.4771525 33.6766915,91 40.6792453,91 L79.3207547,91 Z" id="TrainButton" fill-opacity="0.4" fill="#000000"></path>
-            <path d="M168.320755,91 C175.213894,91 180.82228,95.3383345 180.995859,100.741896 L181,101 L181,112 L117,112 L117,101 C117,95.4771525 122.676691,91 129.679245,91 L168.320755,91 Z" id="TestButton" fill-opacity="0.4" fill="#000000"></path>
-            <path d="M121.320755,52 C128.213894,52 133.82228,56.3383345 133.995859,61.7418955 L134,62 L134,73 L70,73 L70,62 C70,56.4771525 75.6766915,52 82.6792453,52 L121.320755,52 Z" id="EditButton" fill-opacity="0.4" fill="#000000"></path>
+            <path d="M79.3207547,91 C86.2138936,91 91.8222797,95.3383345 91.9958589,100.741896 L92,101 L92,112 L28,112 L28,101 C28,95.4771525 33.6766915,91 40.6792453,91 L79.3207547,91 Z" id="TrainButton" fillOpacity="0.4" fill="#000000"></path>
+            <path d="M168.320755,91 C175.213894,91 180.82228,95.3383345 180.995859,100.741896 L181,101 L181,112 L117,112 L117,101 C117,95.4771525 122.676691,91 129.679245,91 L168.320755,91 Z" id="TestButton" fillOpacity="0.4" fill="#000000"></path>
+            <path d="M121.320755,52 C128.213894,52 133.82228,56.3383345 133.995859,61.7418955 L134,62 L134,73 L70,73 L70,62 C70,56.4771525 75.6766915,52 82.6792453,52 L121.320755,52 Z" id="EditButton" fillOpacity="0.4" fill="#000000" onClick={(event) => params.editModel(event, params.model_key)}></path>
             <text id="EditLayerText" font-family="Helvetica-Bold, Helvetica" font-size="8" font-weight="bold" fill="#000000">
                 <tspan x="82" y="66">Edit Model</tspan>
             </text>

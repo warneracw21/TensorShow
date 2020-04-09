@@ -11,6 +11,7 @@ const LayerInfoStoreProvider = ({children}) => {
     switch (action.type) {
       case 'add': {
         state[[action.layerID]] = action.layer_info;
+        state[[action.layerID]].inModel = false;
         return state;
       }
       case 'delete': {
@@ -21,12 +22,22 @@ const LayerInfoStoreProvider = ({children}) => {
         state[[action.layerID]] = Object.assign({}, state[[action.layerID]], action.layer_info);
         return state;
       }
+      case 'add_to_model': {
+        state[[action.layerID]].inModel = action.model_key;
+        return state;
+      }
     }
   }, {
     "000": {
       layer_name: 'Input Layer',
       layer_type: 'input_layer',
       parent_pos: 'root',
+      inModel: false,
+      position: {
+        row: 0,
+        group: 0,
+        slot: 0
+      },
       layer_params: {
         dataset_name: "",
         train_set_shape: "",

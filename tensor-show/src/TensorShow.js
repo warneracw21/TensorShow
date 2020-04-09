@@ -11,8 +11,9 @@ import EditModel from './Components/EditModel';
 
 // Import Contexts
 import { useEditLayerDialogDispatch } from './AppStores/EditLayerDialogContext';
+import { useEditModelDialogDispatch } from './AppStores/EditModelDialogContext';
 import { useCurrentLayerDispatch } from './AppStores/CurrentLayerContext';
-import { useLayerInfoStoreState } from './AppStores/LayerInfoStore';
+import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from './AppStores/LayerInfoStore';
 import { useModelStoreDispatch } from './AppStores/ModelStore';
 
 
@@ -20,8 +21,12 @@ export default function TensorShow() {
 
   // Subscribe to Contexts
   const dialogDispatch = useEditLayerDialogDispatch();
+  const editModelDispatch = useEditModelDialogDispatch();
   const currentLayerDispatch = useCurrentLayerDispatch();
+  
   const layerInfoStoreState = useLayerInfoStoreState();
+  const layerInfoStoreDispatch = useLayerInfoStoreDispatch();
+
   const modelStoreDispatch = useModelStoreDispatch();
 
 
@@ -45,20 +50,30 @@ export default function TensorShow() {
       model_layers.push(tmp_layer_key);
     }
 
-    console.log(model_layers)
+    
+    // Get Layer Parameters
+    var layer_params = model_layers.map(layer_pos_key => {
+
+      layerInfoStoreDispatch({
+        type: 'add_to_model',
+        layerID: layer_pos_key,
+        model_key: model_key
+      })
+
+      return layerInfoStoreState[layer_pos_key]
+    });
+
+    layer_params.reverse()
 
     // Update the ModelStore
     modelStoreDispatch({
       type: 'add_model', 
       model_key: model_key,
-      model_name: model_name, 
+      model_name: model_name,
+      layer_params: layer_params
     })
 
-    // Get Layer Parameters
-    const layer_params = model_layers.map(layer_pos_key => (
-      layerInfoStoreState[layer_pos_key]))
 
-    console.log(layer_params)
 
     // Call Save Model Route on API
     const url = 'http://0.0.0.0:5000/' + 'save'
@@ -77,7 +92,6 @@ export default function TensorShow() {
             return resp.json()
           })
       } catch (error) {
-        alert("Error in Save Model POST")
       }
       
     }
@@ -113,13 +127,28 @@ export default function TensorShow() {
     dialogDispatch({open: true, dialog_type: "edit"})
   }
 
+  ////////////////////////////////////////////////
+  // Edit Model
+  ////////////////////////////////////////////////
+  const editModel = (event, model_key) => {
+    event.preventDefault();
+
+    console.log(model_key)
+    // Open Dialog
+    editModelDispatch({open: true, model_key: model_key})
+
+    console.log("Edit Model")
+  }
+
+
+
 
   return (
     <div>
     	<CssBaseline/>
     	<AppBar/>
     	<div style={{position: "absolute", top: "10%"}}>
-      	<LayerTree addChild={addChild} editLayer={editLayer}/>
+      	<LayerTree addChild={addChild} editLayer={editLayer} editModel={editModel}/>
       	<EditLayer addModel={addModel}/>
         <EditModel/>
       </div>

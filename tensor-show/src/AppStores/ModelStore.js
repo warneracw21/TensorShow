@@ -12,10 +12,16 @@ const ModelStoreProvider = ({children}) => {
 			case 'add_model': {
 				state[[action.model_key]] = {
 					status: 'init',
-					model_name: action.model_name
+					model_name: action.model_name,
+					layer_params: action.layer_params
 				}
 
 				console.log(state)
+				return state;
+			}
+
+			case 'delete_model': {
+				delete state[[action.model_key]]
 				return state;
 			}
 
@@ -23,6 +29,7 @@ const ModelStoreProvider = ({children}) => {
 
 				state[[action.model_key]].status = action.status
 			}
+
 			
 		}
 

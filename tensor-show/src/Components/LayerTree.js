@@ -29,6 +29,7 @@ export default function LayerTree(params) {
   // Get Component Methods
   const addChild = params.addChild;
   const editLayer = params.editLayer;
+  const editModel = params.editModel;
 
 
   // Iterate over the cardPosState
@@ -110,7 +111,7 @@ export default function LayerTree(params) {
           } else if (layer_info.layer_type === "model") {
             slot_svg = (
               <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-                <ModelCardSVG/>
+                <ModelCardSVG editModel={editModel}/>
               </div>
             );
 

@@ -182,6 +182,11 @@ export default function EditLayer(params) {
 			layer_info: {
 				layer_name: nextLayerName,
 				layer_type: nextLayerType,
+				position: {
+					row: sender_pos.row + 1,
+					group: `${sender_pos.group}${sender_pos.slot}`,
+					slot: connection_pos
+				},
 				parent_pos: sender_pos,
 				layer_params: next_layer_params
 			}
@@ -210,6 +215,7 @@ export default function EditLayer(params) {
 			layer_info: {
 				layer_name: modelName,
 				layer_type: "model",
+				layerID: model_card_position_key
 			}
 		})
 

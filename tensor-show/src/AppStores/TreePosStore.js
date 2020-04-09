@@ -235,7 +235,6 @@ const TreePosReducer = (state, action) => {
       const sender_row = action.sender_pos.row;
       const sender_group = action.sender_pos.group;
       const sender_slot = action.sender_pos.slot;
-
       
       // Calculate the first child group key
       var group_key = `${sender_group}${sender_slot}`;
