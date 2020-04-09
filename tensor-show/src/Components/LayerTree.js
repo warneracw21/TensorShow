@@ -12,53 +12,23 @@ import ModelCardSVG from './CardSVGs/ModelCardSVG';
 /////////////////////////////////////////////////
 // Set Up Contexts
 /////////////////////////////////////////////////
-import { useTreePosStoreState, useTreePosStoreDispatch } from '../AppStores/TreePosStore';
-import { useDialogDispatch } from '../AppStores/DialogContext';
-import { useCurrentLayerDispatch } from '../AppStores/CurrentLayerContext';
+import { useTreePosStoreState } from '../AppStores/TreePosStore';
 import { useLayerInfoStoreState } from '../AppStores/LayerInfoStore';
 
 ///////////////////////////////////////////////////////////
 // LayerTree
 ///////////////////////////////////////////////////////////
-export default function LayerTree() {
+export default function LayerTree(params) {
 
   ////////////////////////////////////////////////
   // Subscribe to Tree Contexts
   ////////////////////////////////////////////////
   const cardPosState = useTreePosStoreState();
-  const cardPosDispatch = useTreePosStoreDispatch();
-
-  const dialogDispatch = useDialogDispatch();
-  const currentLayerDispatch = useCurrentLayerDispatch();
-
   const layerInfoStoreState = useLayerInfoStoreState();
 
-  ////////////////////////////////////////////////
-  // Add Child
-  ////////////////////////////////////////////////
-  const addChild = (event, sender_pos) => {
-    event.preventDefault()
-    
-    // Set the current layer (the sender to dialog)
-    currentLayerDispatch({sender_pos: sender_pos});
-
-    // Open Dialog
-    dialogDispatch({open: true, dialog_type: "add"});
-    return;
-  }
-
-  ////////////////////////////////////////////////
-  // Edit Layer
-  ////////////////////////////////////////////////
-  const editLayer = (event, sender_pos) => {
-    event.preventDefault();
-
-    // Set the current layer (the sender to dialog)
-    currentLayerDispatch({sender_pos: sender_pos});
-
-    // Open Dialog
-    dialogDispatch({open: true, dialog_type: "edit"})
-  }
+  // Get Component Methods
+  const addChild = params.addChild;
+  const editLayer = params.editLayer;
 
 
   // Iterate over the cardPosState
@@ -122,8 +92,6 @@ export default function LayerTree() {
 
         if (slot.render) {
           layer_info = layerInfoStoreState[`${row_key}${group_key}${slot_key}`]
-          console.log(`${row_key}${group_key}${slot_key}`)
-          console.log(layer_info)
           
           // Add Input Card
           if (layer_info.layer_type === "input_layer") {

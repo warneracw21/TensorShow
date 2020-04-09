@@ -32,7 +32,7 @@ import {
 // Set Up Contexts
 /////////////////////////////////////////////////
 import { useTreePosStoreState, useTreePosStoreDispatch } from '../AppStores/TreePosStore';
-import { useDialogState, useDialogDispatch } from '../AppStores/DialogContext';
+import { useEditLayerDialogState, useEditLayerDialogDispatch } from '../AppStores/EditLayerDialogContext';
 import { useCurrentLayerState, useCurrentLayerDispatch } from '../AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from '../AppStores/LayerInfoStore';
 const NextLayerTypeContext = React.createContext(null);
@@ -95,14 +95,14 @@ function onlyUnique(value, index, self) {
 ////////////////////////////////////////////////
 // Edit Layer
 ////////////////////////////////////////////////
-export default function EditLayer() {
+export default function EditLayer(params) {
 	const classes = useStyles();
 
 	////////////////////////////////////////////////
 	// Subscribe to Contexts for this Dialog
 	////////////////////////////////////////////////
-	const {open, dialog_type} = useDialogState();
-	const dialogDispatch = useDialogDispatch();
+	const {open, dialog_type} = useEditLayerDialogState();
+	const dialogDispatch = useEditLayerDialogDispatch();
 
 	const currentLayerState = useCurrentLayerState();
 	const currentLayerDispatch = useCurrentLayerDispatch();
@@ -125,8 +125,6 @@ export default function EditLayer() {
 	const sender_layer_type = sender_info.layer_type
 	const sender_layer_params = sender_info.layer_params;
 	const parent_pos = sender_info.parent_pos;
-
-	console.log(sender_pos, parent_pos)
 
 	////////////////////////////////////////////////
 	// Establish Dialog Hooks for storing Layer Info
@@ -206,7 +204,6 @@ export default function EditLayer() {
 
 			// Calculate position key of model card
 			model_card_position_key = `${sender_pos.row + 2}${sender_pos.group}${sender_pos.slot}${connection_pos}0`
-			console.log(model_card_position_key)
 			layerInfoStoreDispatch({
 			type: 'add', 
 			layerID: model_card_position_key, 
@@ -218,6 +215,21 @@ export default function EditLayer() {
 
 
 			// Add Model Card in Layer Info Store
+
+			///////////////////////////////////////////
+			// Add Model to Model Context
+			///////////////////////////////////////////
+			params.addModel({
+				parent_pos: {
+					row: sender_pos.row + 1,
+					group: `${sender_pos.group}${sender_pos.slot}`,
+					slot: connection_pos
+				},
+				model_key: model_card_position_key,
+				model_name: modelName
+			})
+
+			// Calculate layers
 
 		}
 		
