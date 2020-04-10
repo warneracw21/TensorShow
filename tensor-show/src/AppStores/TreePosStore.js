@@ -205,6 +205,9 @@ const pruneGroup = (tree, row_position, group_pos) => {
   // Iterate over slots in group to see if the group should be pruned
   var slot_keys, slot_key_ind, slot_key;
 
+  if (tree.rows[row_position].groups[group_pos] === undefined) {
+    return tree;
+  }
   slot_keys = Object.keys(tree.rows[row_position].groups[group_pos].slots)
 
   var delete_group = true;
