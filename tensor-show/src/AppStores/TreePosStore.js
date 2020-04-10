@@ -160,16 +160,16 @@ const deleteNode = (tree, row_pos, group_pos, slot_pos) => {
   if (tree.rows[child_row_key] === undefined) {
     console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
     delete tree.rows[row_pos].groups[group_pos].slots[slot_pos];
-    tree = pruneRow(tree, row_pos);
     tree = pruneGroup(tree, row_pos, group_pos)
+    tree = pruneRow(tree, row_pos);
     return tree;
   }
   var child_group_key = `${group_pos}${slot_pos}`;
   if (tree.rows[child_row_key].groups[child_group_key] === undefined) {
     console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
     delete tree.rows[row_pos].groups[group_pos].slots[slot_pos];
-    tree = pruneRow(tree, row_pos);
     tree = pruneGroup(tree, row_pos, group_pos)
+    tree = pruneRow(tree, row_pos);
     return tree;
   }
   var child_group_slots = Object.keys(tree.rows[child_row_key].groups[child_group_key].slots)

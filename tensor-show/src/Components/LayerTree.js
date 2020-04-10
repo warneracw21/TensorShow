@@ -4,10 +4,7 @@
 import React from 'react';
 
 // Import Custom Components
-import LayerCardSVG from './CardSVGs/LayerCardSVG';
 import LayerCard from './LayerCard';
-import InputCardSVG from './CardSVGs/InputCardSVG';
-import ModelCardSVG from './CardSVGs/ModelCardSVG';
 
 /////////////////////////////////////////////////
 // Set Up Contexts
@@ -125,6 +122,8 @@ export default function LayerTree(params) {
                   layerName={layer_info.layer_name}
                   addChild={addChild}
                   sender_pos={{row: i, group: group_key, slot: slot_key}}
+                  labels={[]}
+                  values={[]}
                 />
               </div>
             );
@@ -139,6 +138,8 @@ export default function LayerTree(params) {
                   layerName={layer_info.layer_name}
                   editLayer={editLayer}
                   sender_pos={{row: i, group: group_key, slot: slot_key}}
+                  labels={[]}
+                  values={[]}
                 />
               </div>
             );
@@ -155,6 +156,8 @@ export default function LayerTree(params) {
                   editLayer={editLayer}
                   sender_pos={{row: i, group: group_key, slot: slot_key}}
                   layerName={layer_info.layer_name}
+                  labels={[]}
+                  values={[]}
                 />
               </div>
             );
