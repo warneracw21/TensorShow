@@ -216,7 +216,7 @@ const pruneGroup = (tree, row_position, group_pos) => {
     }
   }
 
-    if (delete_group) {
+  if (delete_group) {
     console.log("DELETING GROUP", row_position, group_pos)
     delete tree.rows[row_position].groups[group_pos]
   }
@@ -298,6 +298,70 @@ const TreePosReducer = (state, action) => {
       // Prune Tree
       // var maximum_row = Math.max(...Object.keys(new_state.rows).map(i => parseInt(i, 10)))
       // pruneTree(new_state, maximum_row, sender_row)
+
+      const parent_row_keys = Object.keys(new_state.rows)
+
+      let group_key;
+      let parent_group_keys, parent_slot_keys;
+      let parent_row_key, parent_group_key, parent_slot_key;
+      let tmp_parent_row, tmp_parent_group, tmp_parent_slot;
+
+      // Iterate over all rows to get a parent row
+      for (var i=0; i<parent_row_keys.length - 1; i++) {
+        parent_row_key = parseInt(parent_row_keys[i], 10);
+        tmp_parent_row = new_state.rows[parent_row_key];
+        parent_group_keys = Object.keys(tmp_parent_row.groups).sort()
+
+
+        // Iterate over Parent Group Keys
+        for (var j=0; j<parent_group_keys.length; j++) {
+          parent_group_key = parent_group_keys[j];
+          tmp_parent_group = new_state.rows[parent_row_key].groups[parent_group_key];
+          parent_slot_keys = Object.keys(tmp_parent_group.slots).sort()
+
+          // Iterate over slot keys in the parent group
+          for (var k=0; k<parent_slot_keys.length; k++) {
+            parent_slot_key = parent_slot_keys[k];
+            tmp_parent_slot = new_state.rows[parent_row_key].groups[parent_group_key].slots[parent_slot_key];
+            
+            // Calculate Group Key ROW|GROUP|SLOT
+            group_key = `${parent_group_key}${parent_slot_key}`;
+            // console.log(parent_row_key, parent_group_key, parent_slot_key)
+            // console.log(group_key)
+            // console.log(JSON.parse(JSON.stringify(new_state)))
+
+            // Check if this key is in the child row's groups
+            // // We do not want to create a new group if we do not have to
+            if (!(new_state.rows[parent_row_key + 1].groups[group_key] === undefined)) {
+              continue
+            }
+
+            // Add a new group with one slot
+            new_state.rows[parent_row_key + 1].groups[group_key] = {
+              disp: {
+                x: 0,
+                y: 0,
+                width: SLOT_WIDTH,
+                height: SLOT_HEIGHT
+              },
+              sender_group: parent_group_key,
+              sender_slot: parent_slot_key,
+              slots: {
+                0: {
+                  disp: {
+                    x: 0,
+                    y: 0,
+                    width: SLOT_WIDTH,
+                    height: SLOT_HEIGHT
+                  },
+                  active_connections: [false, false, false, false],
+                  render: false
+                }
+              }
+            }
+          }
+        }
+      }
 
       // Propogate Widths back up Tree
       console.log("After", JSON.parse(JSON.stringify(new_state)))
