@@ -192,8 +192,8 @@ const deleteNode = (tree, row_pos, group_pos, slot_pos) => {
     delete tree.rows[row_pos].groups[group_pos];
   }
 
-  tree = pruneRow(tree, row_pos);
   tree = pruneGroup(tree, row_pos, group_pos)
+  tree = pruneRow(tree, row_pos);
 
   return tree;
 
