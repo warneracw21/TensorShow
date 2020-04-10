@@ -93,8 +93,9 @@ export default function LayerTree(params) {
 
         if (slot.render) {
           layer_info = layerInfoStoreState[`${row_key}${group_key}${slot_key}`]
-          console.log(layer_info)
-          
+          if (layer_info === undefined) {
+            console.log(`${row_key}${group_key}${slot_key}`)
+          }
           // Add Input Card
           if (layer_info.layer_type === "input_layer") {
             slot_svg = (
@@ -150,7 +151,7 @@ export default function LayerTree(params) {
           slot_svgs.push(slot_svg)
           
           // Check if next row exists
-          if (pos_tree.rows[row_key + 1]) {
+          if (pos_tree.rows[row_key + 1] !== undefined) {
             
             // Instantiate the canvas
             var canv_params = {
@@ -166,6 +167,9 @@ export default function LayerTree(params) {
 
             // Calculate entities for next row, group and slots
             tmp_group = pos_tree.rows[row_key + 1].groups[`${group_key}${slot_key}`];
+            if (tmp_group === undefined) {
+              console.log(row_key, group_key, slot_key)
+            }
             tmp_slot_keys = Object.keys(tmp_group.slots);
 
             // Iterate over slots, find if renderable, if so, add end_pos
@@ -207,6 +211,9 @@ export default function LayerTree(params) {
             )
 
           }
+        } else {
+          slot_svgs.push(
+            <div style={{...style, backgroundColor: "#FF0000"}}/>)
         }
       }
 

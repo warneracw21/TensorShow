@@ -153,72 +153,114 @@ const propogateWidth = (PositionTree, row_position) => {
   return propogateWidth(new_tree, parent_row_pos); 
 }
 
-const deleteNode = (tree, row_pos, group_key) => {
+const deleteNode = (tree, row_pos, group_pos, slot_pos) => {
+  console.log("Deleting from", row_pos, group_pos, slot_pos)
 
-
-  var group_key_ind, tmp_group_key;
+  var child_row_key = row_pos + 1;
+  if (tree.rows[child_row_key] === undefined) {
+    console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
+    delete tree.rows[row_pos].groups[group_pos].slots[slot_pos];
+    tree = pruneRow(tree, row_pos);
+    tree = pruneGroup(tree, row_pos, group_pos)
+    return tree;
+  }
+  var child_group_key = `${group_pos}${slot_pos}`;
+  if (tree.rows[child_row_key].groups[child_group_key] === undefined) {
+    console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
+    delete tree.rows[row_pos].groups[group_pos].slots[slot_pos];
+    tree = pruneRow(tree, row_pos);
+    tree = pruneGroup(tree, row_pos, group_pos)
+    return tree;
+  }
+  var child_group_slots = Object.keys(tree.rows[child_row_key].groups[child_group_key].slots)
   var slot_key_ind, slot_key;
-  var next_group_key;
+  for (slot_key_ind=0; slot_key_ind<child_group_slots.length; slot_key_ind++) {
+    slot_key = child_group_slots[slot_key_ind];
 
-
-  // Check if row is undefined (Previous Node was Leaf)
-  if (tree.rows[row_pos] === undefined) {
-    return
+    // Call delete node on all children
+    tree = deleteNode(tree, child_row_key, child_group_key, slot_key)
   }
 
-  // Check if group is undefiend (Previous Node was Leaf)
-  if (tree.rows[row_pos].groups[group_key] === undefined) {
-    return;
+  // Always delete the sender
+  console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
+  delete tree.rows[row_pos].groups[group_pos].slots[slot_pos];
+
+  // Check if we should delete the group
+
+  if (Object.keys(tree.rows[row_pos].groups[group_pos].slots).length === 0) {
+    console.log("DELETING GROUP", row_pos, group_pos)
+    delete tree.rows[row_pos].groups[group_pos];
   }
 
-  var slot_keys = Object.keys(tree.rows[row_pos].groups[group_key].slots).sort();
-  if (slot_keys === undefined) {
-    return;
-  }
+  tree = pruneRow(tree, row_pos);
+  tree = pruneGroup(tree, row_pos, group_pos)
 
-  // Iterate over the slots in this group
-  for (slot_key_ind=0; slot_key_ind<slot_keys.length; slot_key_ind++) {
-    slot_key = slot_keys[slot_key_ind];
-
-    // Calculate next group_key
-    next_group_key = `${group_key}${slot_key}`
-
-    // Call recursion (safety checks in place!)
-    deleteNode(tree, row_pos + 1, next_group_key);
-
-    // Delete the slot
-    delete tree.rows[row_pos].groups[group_key].slots[slot_key];
-  }
-
-  // Delete the group
-  delete tree.rows[row_pos].groups[group_key];
-
-  // Check if row needs to be deleted
-  var delete_row = true;
-  const group_keys = Object.keys(tree.rows[row_pos].groups)
-  for (group_key_ind=0; group_key_ind<group_keys.length; group_key_ind++) {
-    tmp_group_key = group_keys[group_key_ind];
-
-    slot_keys = Object.keys(tree.rows[row_pos].groups[tmp_group_key].slots) 
-    for (slot_key_ind=0; slot_key_ind<slot_keys.length; slot_key_ind++) {
-      slot_key = slot_keys[slot_key_ind];
-
-      if (tree.rows[row_pos].groups[tmp_group_key].slots[slot_key].render) {
-        delete_row = false
-      }
-    }
-  }
-
-  ///////////////
-  // Delete the row
-  ///////////////
-  if (delete_row) {
-    console.log("DELETE ROW:", row_pos)
-    delete tree.rows[row_pos]
-  }
+  return tree;
 
 }
 
+const pruneGroup = (tree, row_position, group_pos) => {
+  console.log("Pruning Group From", row_position, group_pos)
+
+  // Iterate over slots in group to see if the group should be pruned
+  var slot_keys, slot_key_ind, slot_key;
+
+  slot_keys = Object.keys(tree.rows[row_position].groups[group_pos].slots)
+
+  var delete_group = true;
+  for (slot_key_ind=0; slot_key_ind<slot_keys.length; slot_key_ind++) {
+    slot_key = slot_keys[slot_key_ind];
+
+    if (tree.rows[row_position].groups[group_pos].slots[slot_key].render) {
+      delete_group = false;
+    }
+  }
+
+    if (delete_group) {
+    console.log("DELETING GROUP", row_position, group_pos)
+    delete tree.rows[row_position].groups[group_pos]
+  }
+
+  return tree;
+}
+
+
+const pruneRow = (tree, row_position) => {
+  console.log("Pruning Row From", row_position)
+
+  var delete_row, delete_group;
+  var group_keys, group_key_ind, group_key;
+  var slot_keys, slot_key_ind, slot_key;
+  // Iterate over groups in row
+    // Iterate over slots in group
+      // If slot has render, delete row is false
+
+  delete_row = true;
+  group_keys = Object.keys(tree.rows[row_position].groups)
+  for (group_key_ind=0; group_key_ind<group_keys.length; group_key_ind++) {
+    group_key = group_keys[group_key_ind];
+    slot_keys = Object.keys(tree.rows[row_position].groups[group_key].slots)
+
+    delete_group = true;
+    for (slot_key_ind=0; slot_key_ind<slot_keys.length; slot_key_ind++) {
+      slot_key = slot_keys[slot_key_ind];
+
+      if (tree.rows[row_position].groups[group_key].slots[slot_key].render) {
+        delete_row = false;
+        delete_group = false;
+      }
+    }
+
+  }
+
+  if (delete_row) {
+    console.log("DELETING ROW", row_position)
+    delete tree.rows[row_position]
+  }
+
+  return tree;
+
+}
 
 const TreePosReducer = (state, action) => {
 
@@ -229,6 +271,8 @@ const TreePosReducer = (state, action) => {
 
     case ('delete_node'): {
 
+      console.log('delete')
+
       // Make deep copy of old state
       var new_state = {...state};
 
@@ -236,19 +280,28 @@ const TreePosReducer = (state, action) => {
       const sender_group = action.sender_pos.group;
       const sender_slot = action.sender_pos.slot;
 
-      console.log(action.sender_pos)
+      // Purity Check (see if node still exists)
+      // Does row exists
+      if (state.rows[sender_row] === undefined) {
+        return new_state;
+      }
+      // Does group exist
+      if (state.rows[sender_row].groups[sender_group] === undefined) {
+        return new_state;
+      }
       
-      // Calculate the first child group key
-      var group_key = `${sender_group}${sender_slot}`;
 
       // Delete All Children
-      deleteNode(new_state, sender_row + 1, group_key);
+      console.log("Before", JSON.parse(JSON.stringify(new_state)))
+      new_state = deleteNode(new_state, sender_row, sender_group, sender_slot);
 
-      // Delete sender
-      delete new_state.rows[sender_row].groups[sender_group].slots[sender_slot]
+      // Prune Tree
+      // var maximum_row = Math.max(...Object.keys(new_state.rows).map(i => parseInt(i, 10)))
+      // pruneTree(new_state, maximum_row, sender_row)
 
-      // Propogate Changes
-      const maximum_row = Math.max(...Object.keys(new_state.rows).map(i => parseInt(i, 10)))
+      // Propogate Widths back up Tree
+      console.log("After", JSON.parse(JSON.stringify(new_state)))
+      var maximum_row = Math.max(...Object.keys(new_state.rows).map(i => parseInt(i, 10)))
       new_state = propogateWidth(
         {...new_state}, 
         maximum_row, 

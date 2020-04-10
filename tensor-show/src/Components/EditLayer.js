@@ -166,6 +166,8 @@ export default function EditLayer(params) {
 		const connection_pos = active_connections.length;
 		const new_sender_pos = {...sender_pos, connection: connection_pos}
 
+		console.log(new_sender_pos)
+
 		// Add Child Position to Position Tree
 		treePosDispatch({
 			type: 'add_child', 
@@ -295,6 +297,15 @@ export default function EditLayer(params) {
 
 	const handleDelete = (event) => {
 		event.preventDefault();
+
+		// Remove node from parent connections
+		const tree = treePosState;
+		const parent_pos = sender_info.parent_pos;
+		const parent_node = tree.rows[parent_pos.row].groups[parent_pos.group].slots[parent_pos.slot]
+		var active_connections = parent_node.active_connections
+		active_connections = active_connections.filter( onlyUnique )
+		active_connections.pop()
+		parent_node.active_connections = active_connections;
 
 		// Delete Sender Node Position from Position Tree
 		treePosDispatch({
