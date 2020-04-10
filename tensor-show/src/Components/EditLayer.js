@@ -71,16 +71,24 @@ const layer_type_map = {
 ////////////////////////////////////////////////
 // Helper Functions
 ////////////////////////////////////////////////
-const getNextLayerOptions = (parent_layer_type) => {
+const getNextLayerOptions = (parent_layer_type, dialog_type) => {
 	switch (parent_layer_type) {
 		case "input_layer": {
 			return ["conv_layer", "pool_layer", "full_layer"]
 		}
 		case "conv_layer": {
-			return ["conv_layer", "pool_layer", "full_layer"]
+			if (dialog_type === 'edit') {
+				return ["conv_layer", "pool_layer"]
+			} else {
+				return ["conv_layer", "pool_layer", "full_layer"]
+			}
 		}
 		case "pool_layer": {
-			return ["conv_layer", "pool_layer", "full_layer"]
+			if (dialog_type === 'edit') {
+				return ["conv_layer", "pool_layer"]
+			} else {
+				return ["conv_layer", "pool_layer", "full_layer"]
+			}
 		}
 		case "full_layer": {
 			return ["full_layer"]
@@ -126,10 +134,17 @@ export default function EditLayer(params) {
 	const sender_layer_params = sender_info.layer_params;
 	const parent_pos = sender_info.parent_pos;
 
+	var disable_last_layer = false;
+	if (dialog_type === 'edit') {
+		if (sender_info.inModel) {
+			disable_last_layer = true
+		}
+	}
+
 	////////////////////////////////////////////////
 	// Establish Dialog Hooks for storing Layer Info
 	////////////////////////////////////////////////
-	const next_layer_options = getNextLayerOptions(sender_layer_type)
+	const next_layer_options = getNextLayerOptions(sender_layer_type, dialog_type)
 	const [nextLayerName, setNextLayerName] = React.useState("New Layer")
 	const [nextLayerType, setNextLayerType] = React.useState(next_layer_options[0])
 	const [nextLayerParams, setNextLayerParams] = React.useState({})
@@ -419,8 +434,8 @@ export default function EditLayer(params) {
 	        }}
 	        variant="outlined"
 	        helperText="Output Units"
-	        value={strideX}
-	        onChange={(event) => setStrideX(event.target.value)}
+	        value={outputUnits}
+	        onChange={(event) => setOutputUnits(event.target.value)}
 	      />
        	<FormControlLabel
        		className={classes.paramTextField}
@@ -429,6 +444,7 @@ export default function EditLayer(params) {
 	            checked={lastLayer}
 	            onChange={() => setLastLayer(!lastLayer)}
 	            color="secondary"
+	            disabled={disable_last_layer}
 	          />
 	        }
         	label="Last Layer?"

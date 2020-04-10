@@ -93,6 +93,7 @@ export default function LayerTree(params) {
 
         if (slot.render) {
           layer_info = layerInfoStoreState[`${row_key}${group_key}${slot_key}`]
+          console.log(layer_info)
           
           // Add Input Card
           if (layer_info.layer_type === "input_layer") {
@@ -111,7 +112,9 @@ export default function LayerTree(params) {
           } else if (layer_info.layer_type === "model") {
             slot_svg = (
               <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-                <ModelCardSVG editModel={editModel}/>
+                <ModelCardSVG 
+                  editModel={editModel}
+                  model_key={layer_info.layerID}/>
               </div>
             );
 
@@ -122,6 +125,8 @@ export default function LayerTree(params) {
               <div style={style} key={`${row_key}${group_key}${slot_key}`}>
                 <LayerCardSVG
                   layerName={layer_info.layer_name}
+                  editLayer={editLayer}
+                  sender_pos={{row: i, group: group_key, slot: slot_key}}
                 />
               </div>
             );
