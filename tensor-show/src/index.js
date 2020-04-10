@@ -6,9 +6,11 @@ import TensorShow from './TensorShow';
 
 // Import Contexts
 import { TreePosStoreProvider } from './AppStores/TreePosStore';
-import { DialogContextProvider } from './AppStores/DialogContext';
+import { EditLayerDialogContextProvider } from './AppStores/EditLayerDialogContext';
 import { CurrentLayerContextProvider } from './AppStores/CurrentLayerContext';
 import { LayerInfoStoreProvider } from './AppStores/LayerInfoStore';
+import { ModelStoreProvider } from './AppStores/ModelStore';
+import { EditModelDialogContextProvider } from './AppStores/EditModelDialogContext';
 
 function App() {
   return (
@@ -16,13 +18,17 @@ function App() {
      
       <TreePosStoreProvider>
       <CurrentLayerContextProvider>
-      <DialogContextProvider>
+      <EditLayerDialogContextProvider>
+      <EditModelDialogContextProvider>
       <LayerInfoStoreProvider>
+      <ModelStoreProvider>
       
           <TensorShow/>
 
+      </ModelStoreProvider>
       </LayerInfoStoreProvider>
-      </DialogContextProvider>
+      </EditModelDialogContextProvider>
+      </EditLayerDialogContextProvider>
       </CurrentLayerContextProvider>
       </TreePosStoreProvider>
 
