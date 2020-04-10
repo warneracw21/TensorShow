@@ -5,7 +5,7 @@ import React from 'react';
 
 // Import Custom Components
 import LayerCardSVG from './CardSVGs/LayerCardSVG';
-import LayerCard from './CardSVGs/LayerCard';
+import LayerCard from './LayerCard';
 import InputCardSVG from './CardSVGs/InputCardSVG';
 import ModelCardSVG from './CardSVGs/ModelCardSVG';
 
@@ -84,6 +84,9 @@ export default function LayerTree(params) {
         // Render or placeholder
         style = {
           position: 'absolute',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
           top: disp.y,
           left: disp.x,
           height: disp.height,
@@ -100,11 +103,15 @@ export default function LayerTree(params) {
           if (layer_info.layer_type === "input_layer") {
             slot_svg = (
               <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-                <InputCardSVG
-                  sender_pos={{row: i, group: group_key, slot: slot_key}}
-                  layer_info={layer_info}
+                <LayerCard
+                  layerType={layer_info.layer_type}
+                  layerName={"Input Layer"}
                   addChild={addChild}
                   sender_pos={{row: i, group: group_key, slot: slot_key}}
+                  labels={["Dataset Name", "Train Size", "Test Size"]}
+                  values={[layer_info.layer_params.dataset_name,
+                           layer_info.layer_params.train_set_shape,
+                           layer_info.layer_params.test_set_shape]}
                 />
               </div>
             );
@@ -113,9 +120,12 @@ export default function LayerTree(params) {
           } else if (layer_info.layer_type === "model") {
             slot_svg = (
               <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-                <ModelCardSVG 
-                  editModel={editModel}
-                  model_key={layer_info.layerID}/>
+                <LayerCard
+                  layerType={layer_info.layer_type}
+                  layerName={layer_info.layer_name}
+                  addChild={addChild}
+                  sender_pos={{row: i, group: group_key, slot: slot_key}}
+                />
               </div>
             );
 
@@ -124,7 +134,8 @@ export default function LayerTree(params) {
           } else if ((layer_info.layer_type === "full_layer") & (layer_info.layer_params.last_layer)) {
             slot_svg = (
               <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-                <LayerCardSVG
+                <LayerCard
+                  layerType={layer_info.layer_type}
                   layerName={layer_info.layer_name}
                   editLayer={editLayer}
                   sender_pos={{row: i, group: group_key, slot: slot_key}}
@@ -139,7 +150,7 @@ export default function LayerTree(params) {
           // Add Layer Card
             slot_svg = (
               <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-                <LayerCardSVG
+                <LayerCard
                   addChild={addChild}
                   editLayer={editLayer}
                   sender_pos={{row: i, group: group_key, slot: slot_key}}
@@ -268,8 +279,8 @@ export default function LayerTree(params) {
       width: "98%", 
       height:"98%"
     }}>
-      {canvas_elements}
       {TreeSVG}
+      {canvas_elements}
     </div>
     )
 }

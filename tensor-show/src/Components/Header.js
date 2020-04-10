@@ -42,6 +42,7 @@ const useStyles = makeStyles(theme => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
+    backgroundColor: "#ff911c"
   },
   appBarShift: {
     width: `calc(100% - ${drawerWidth}px)`,
@@ -53,6 +54,7 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     flexGrow: 1,
+    backgroundColor: "#ff911c"
   },
   hide: {
     display: 'none',

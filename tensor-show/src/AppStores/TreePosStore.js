@@ -7,10 +7,10 @@ const TreePosStoreDispatchContext = React.createContext(null);
 // Set Constants
 ////////////////////////////////////////////////////////////////////////
 const SLOT_HEIGHT = 300;
-const SLOT_WIDTH = 250;
+const SLOT_WIDTH = 300;
 
 const ROW_INIT = 0;
-const ROW_DIFF = 300;
+const ROW_DIFF = 350;
 
 
 
