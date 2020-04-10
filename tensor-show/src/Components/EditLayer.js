@@ -32,8 +32,8 @@ import {
 // Set Up Contexts
 /////////////////////////////////////////////////
 import { useTreePosStoreState, useTreePosStoreDispatch } from '../AppStores/TreePosStore';
-import { useDialogState, useDialogDispatch } from '../AppStores/DialogContext';
-import { useCurrentLayerState } from '../AppStores/CurrentLayerContext';
+import { useEditLayerDialogState, useEditLayerDialogDispatch } from '../AppStores/EditLayerDialogContext';
+import { useCurrentLayerState, useCurrentLayerDispatch } from '../AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from '../AppStores/LayerInfoStore';
 const NextLayerTypeContext = React.createContext(null);
 const NextLayerParamsContext = React.createContext(null);
@@ -71,16 +71,24 @@ const layer_type_map = {
 ////////////////////////////////////////////////
 // Helper Functions
 ////////////////////////////////////////////////
-const getNextLayerOptions = (parent_layer_type) => {
+const getNextLayerOptions = (parent_layer_type, dialog_type) => {
 	switch (parent_layer_type) {
 		case "input_layer": {
 			return ["conv_layer", "pool_layer", "full_layer"]
 		}
 		case "conv_layer": {
-			return ["conv_layer", "pool_layer", "full_layer"]
+			if (dialog_type === 'edit') {
+				return ["conv_layer", "pool_layer"]
+			} else {
+				return ["conv_layer", "pool_layer", "full_layer"]
+			}
 		}
 		case "pool_layer": {
-			return ["conv_layer", "pool_layer", "full_layer"]
+			if (dialog_type === 'edit') {
+				return ["conv_layer", "pool_layer"]
+			} else {
+				return ["conv_layer", "pool_layer", "full_layer"]
+			}
 		}
 		case "full_layer": {
 			return ["full_layer"]
@@ -95,16 +103,17 @@ function onlyUnique(value, index, self) {
 ////////////////////////////////////////////////
 // Edit Layer
 ////////////////////////////////////////////////
-export default function EditLayer() {
+export default function EditLayer(params) {
 	const classes = useStyles();
 
 	////////////////////////////////////////////////
 	// Subscribe to Contexts for this Dialog
 	////////////////////////////////////////////////
-	const {open, dialog_type} = useDialogState();
-	const dialogDispatch = useDialogDispatch();
+	const {open, dialog_type} = useEditLayerDialogState();
+	const dialogDispatch = useEditLayerDialogDispatch();
 
 	const currentLayerState = useCurrentLayerState();
+	const currentLayerDispatch = useCurrentLayerDispatch();
 
 	const treePosState = useTreePosStoreState();
 	const treePosDispatch = useTreePosStoreDispatch();
@@ -123,14 +132,23 @@ export default function EditLayer() {
 	const sender_layer_name = sender_info.layer_name
 	const sender_layer_type = sender_info.layer_type
 	const sender_layer_params = sender_info.layer_params;
+	const parent_pos = sender_info.parent_pos;
+
+	var disable_last_layer = false;
+	if (dialog_type === 'edit') {
+		if (sender_info.inModel) {
+			disable_last_layer = true
+		}
+	}
 
 	////////////////////////////////////////////////
 	// Establish Dialog Hooks for storing Layer Info
 	////////////////////////////////////////////////
-	const next_layer_options = getNextLayerOptions(sender_layer_type)
+	const next_layer_options = getNextLayerOptions(sender_layer_type, dialog_type)
 	const [nextLayerName, setNextLayerName] = React.useState("New Layer")
 	const [nextLayerType, setNextLayerType] = React.useState(next_layer_options[0])
 	const [nextLayerParams, setNextLayerParams] = React.useState({})
+	const [modelName, setModelName] = React.useState("New Model")
 
 	///////////////////////////////////////////////////////
 	// Edit Layer Functionality Methods
@@ -147,6 +165,8 @@ export default function EditLayer() {
 
 		const connection_pos = active_connections.length;
 		const new_sender_pos = {...sender_pos, connection: connection_pos}
+
+		console.log(new_sender_pos)
 
 		// Add Child Position to Position Tree
 		treePosDispatch({
@@ -179,9 +199,62 @@ export default function EditLayer() {
 			layer_info: {
 				layer_name: nextLayerName,
 				layer_type: nextLayerType,
+				position: {
+					row: sender_pos.row + 1,
+					group: `${sender_pos.group}${sender_pos.slot}`,
+					slot: connection_pos
+				},
+				parent_pos: sender_pos,
 				layer_params: next_layer_params
 			}
 		})
+
+		// Check if Last Layer is added
+		var model_card_position_key;
+		if (lastLayer) {
+
+			// Add Position for Model Card
+			treePosDispatch({
+				type: 'add_child', 
+				sender_pos: {
+					row: sender_pos.row + 1,
+					group: `${sender_pos.group}${sender_pos.slot}`,
+					slot: connection_pos,
+					connection: 0
+				}
+			});
+
+			// Calculate position key of model card
+			model_card_position_key = `${sender_pos.row + 2}${sender_pos.group}${sender_pos.slot}${connection_pos}0`
+			layerInfoStoreDispatch({
+			type: 'add', 
+			layerID: model_card_position_key, 
+			layer_info: {
+				layer_name: modelName,
+				layer_type: "model",
+				layerID: model_card_position_key
+			}
+		})
+
+
+			// Add Model Card in Layer Info Store
+
+			///////////////////////////////////////////
+			// Add Model to Model Context
+			///////////////////////////////////////////
+			params.addModel({
+				parent_pos: {
+					row: sender_pos.row + 1,
+					group: `${sender_pos.group}${sender_pos.slot}`,
+					slot: connection_pos
+				},
+				model_key: model_card_position_key,
+				model_name: modelName
+			})
+
+			// Calculate layers
+
+		}
 		
 		// Close Dialog
 		dialogDispatch({open: false});
@@ -209,7 +282,7 @@ export default function EditLayer() {
 		}
 
 		layerInfoStoreDispatch({
-			type: 'add', 
+			type: 'update', 
 			layerID: sender_pos_key, 
 			layer_info: {
 				layer_name: nextLayerName,
@@ -225,6 +298,15 @@ export default function EditLayer() {
 	const handleDelete = (event) => {
 		event.preventDefault();
 
+		// Remove node from parent connections
+		const tree = treePosState;
+		const parent_pos = sender_info.parent_pos;
+		const parent_node = tree.rows[parent_pos.row].groups[parent_pos.group].slots[parent_pos.slot]
+		var active_connections = parent_node.active_connections
+		active_connections = active_connections.filter( onlyUnique )
+		active_connections.pop()
+		parent_node.active_connections = active_connections;
+
 		// Delete Sender Node Position from Position Tree
 		treePosDispatch({
 			type: 'delete_node', 
@@ -232,6 +314,13 @@ export default function EditLayer() {
 		});
 
 		// Delete Sender Node Information from Info Store
+		layerInfoStoreDispatch({
+			type: 'delete',
+			layerID: sender_pos_key
+		})
+
+		// Set currentLayer to parent
+		currentLayerDispatch({sender_pos: parent_pos});
 
 		// Close Dialog
 		dialogDispatch({open: false});
@@ -322,7 +411,7 @@ export default function EditLayer() {
 	        variant="outlined"
 	        helperText="X Stride"
 	        value={strideX}
-	        onChange={(event) => setStrideX(event.value.target)}
+	        onChange={(event) => setStrideX(event.target.value)}
 	      />
        	<TextField
        		className={classes.paramTextField}
@@ -333,7 +422,7 @@ export default function EditLayer() {
 	        variant="outlined"
 	        helperText="Y Stride"
 	        value={strideY}
-	        onChange={(event) => setStrideY(event.value.target)}
+	        onChange={(event) => setStrideY(event.target.value)}
 	      />
 	     </div>
 		</div>
@@ -356,8 +445,8 @@ export default function EditLayer() {
 	        }}
 	        variant="outlined"
 	        helperText="Output Units"
-	        value={strideX}
-	        onChange={(event) => setStrideX(event.target.value)}
+	        value={outputUnits}
+	        onChange={(event) => setOutputUnits(event.target.value)}
 	      />
        	<FormControlLabel
        		className={classes.paramTextField}
@@ -366,11 +455,20 @@ export default function EditLayer() {
 	            checked={lastLayer}
 	            onChange={() => setLastLayer(!lastLayer)}
 	            color="secondary"
+	            disabled={disable_last_layer}
 	          />
 	        }
         	label="Last Layer?"
       	/>
-	     </div>
+	    </div>
+   		{lastLayer ? (
+   			<TextField
+					className={classes.layerNameTextField}
+	        label="Model Name"
+	        defaultValue="Default Value"
+	        value={modelName}
+	        onChange={(event) => setModelName(event.target.value)}
+	      />): null}
 		</div>
 	);
 
@@ -557,6 +655,9 @@ export default function EditLayer() {
 	// Setup Default Parameters
 	///////////////////////////////////////////////////////
 	React.useEffect(() => {
+
+		// Always set last layer to false
+		setLastLayer(false);
 
 		// In Edit Mode -> set layer name to saved layer name
 		if (dialog_type === 'edit') {
