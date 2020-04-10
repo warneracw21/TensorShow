@@ -152,71 +152,70 @@ export default function LayerTree(params) {
           
           // Check if next row exists
           if (pos_tree.rows[row_key + 1] !== undefined) {
+
+            if (pos_tree.rows[row_key + 1].groups[`${group_key}${slot_key}`] !== undefined) {
             
-            // Instantiate the canvas
-            var canv_params = {
-              start_y: pos_tree.rows[row_key].disp.y + 200,
-              end_y: pos_tree.rows[row_key + 1].disp.y,
-              start_x: group.disp.x + slot.disp.x,
-              end_x: group.disp.x + slot.disp.x + slot.disp.width
-            }
-
-            // Calculate points for Bezier Curves in this canvas
-            var bezier_points = [];
-            start_point = [(canv_params.end_x - canv_params.start_x) / 2, 0];
-
-            // Calculate entities for next row, group and slots
-            tmp_group = pos_tree.rows[row_key + 1].groups[`${group_key}${slot_key}`];
-            if (tmp_group === undefined) {
-              console.log(row_key, group_key, slot_key)
-            }
-            tmp_slot_keys = Object.keys(tmp_group.slots);
-
-            // Iterate over slots, find if renderable, if so, add end_pos
-            for (var q=0; q<tmp_slot_keys.length; q++) {
-              tmp_slot = tmp_group.slots[tmp_slot_keys[q]];
-              if (tmp_slot.render) {
-                end_point = [
-                    tmp_slot.disp.x + tmp_slot.disp.width / 2,
-                    canv_params.end_y - canv_params.start_y
-                  ]; 
-
-                // Draw Bezier Curve
-                bezier_points.push(
-                  <path stroke="black" strokeWidth={4} fill="transparent" d={
-                    `
-                    M ${start_point[0]} ${start_point[1]}
-                    C ${start_point[0]} ${start_point[1] + 50}, ${end_point[0]} ${end_point[1] - 50},
-                    ${end_point[0]} ${end_point[1]}
-                    `
-                  }/>)
+              // Instantiate the canvas
+              var canv_params = {
+                start_y: pos_tree.rows[row_key].disp.y + 200,
+                end_y: pos_tree.rows[row_key + 1].disp.y,
+                start_x: group.disp.x + slot.disp.x,
+                end_x: group.disp.x + slot.disp.x + slot.disp.width
               }
+
+              // Calculate points for Bezier Curves in this canvas
+              var bezier_points = [];
+              start_point = [(canv_params.end_x - canv_params.start_x) / 2, 0];
+
+              // Calculate entities for next row, group and slots
+              tmp_group = pos_tree.rows[row_key + 1].groups[`${group_key}${slot_key}`];
+              if (tmp_group === undefined) {
+                console.log(row_key, group_key, slot_key)
+              }
+              tmp_slot_keys = Object.keys(tmp_group.slots);
+
+              // Iterate over slots, find if renderable, if so, add end_pos
+              for (var q=0; q<tmp_slot_keys.length; q++) {
+                tmp_slot = tmp_group.slots[tmp_slot_keys[q]];
+                if (tmp_slot.render) {
+                  end_point = [
+                      tmp_slot.disp.x + tmp_slot.disp.width / 2,
+                      canv_params.end_y - canv_params.start_y
+                    ]; 
+
+                  // Draw Bezier Curve
+                  bezier_points.push(
+                    <path stroke="black" strokeWidth={4} fill="transparent" d={
+                      `
+                      M ${start_point[0]} ${start_point[1]}
+                      C ${start_point[0]} ${start_point[1] + 50}, ${end_point[0]} ${end_point[1] - 50},
+                      ${end_point[0]} ${end_point[1]}
+                      `
+                    }/>)
+                }
+              }
+
+              canvas_elements.push(
+                <div
+                  style={{
+                    position: "absolute",
+                    left: canv_params.start_x,
+                    top: canv_params.start_y,
+                    width: canv_params.end_x - canv_params.start_x,
+                    height: canv_params.end_y - canv_params.start_y,
+                  }}>
+                  <svg 
+                    height={canv_params.end_y - canv_params.start_y}
+                    width={canv_params.end_x - canv_params.start_x}>
+                    {bezier_points}
+                  </svg>
+                </div>
+              )
+
             }
-
-            canvas_elements.push(
-              <div
-                style={{
-                  position: "absolute",
-                  left: canv_params.start_x,
-                  top: canv_params.start_y,
-                  width: canv_params.end_x - canv_params.start_x,
-                  height: canv_params.end_y - canv_params.start_y,
-                }}>
-                <svg 
-                  height={canv_params.end_y - canv_params.start_y}
-                  width={canv_params.end_x - canv_params.start_x}>
-                  {bezier_points}
-                </svg>
-              </div>
-            )
-
           }
-        } else {
-          slot_svgs.push(
-            <div style={{...style, backgroundColor: "#FF0000"}}/>)
         }
       }
-
       // Render group_svg, add to group_svgs
       disp = group.disp;
       style = {
