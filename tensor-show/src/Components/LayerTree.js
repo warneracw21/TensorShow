@@ -27,6 +27,7 @@ export default function LayerTree(params) {
   const addChild = params.addChild;
   const editLayer = params.editLayer;
   const editModel = params.editModel;
+  const chooseDataset = params.chooseDataset;
 
 
   // Iterate over the cardPosState
@@ -104,11 +105,12 @@ export default function LayerTree(params) {
                   layerType={layer_info.layer_type}
                   layerName={"Input Layer"}
                   addChild={addChild}
+                  chooseDataset={chooseDataset}
                   sender_pos={{row: i, group: group_key, slot: slot_key}}
-                  labels={["Dataset Name", "Train Size", "Test Size"]}
+                  labels={["Dataset Name", "Shape", "Labels"]}
                   values={[layer_info.layer_params.dataset_name,
-                           layer_info.layer_params.train_set_shape,
-                           layer_info.layer_params.test_set_shape]}
+                           layer_info.layer_params.shape,
+                           layer_info.layer_params.labels]}
                 />
               </div>
             );
@@ -120,7 +122,7 @@ export default function LayerTree(params) {
                 <LayerCard
                   layerType={layer_info.layer_type}
                   layerName={layer_info.layer_name}
-                  addChild={addChild}
+                  editModel={editModel}
                   sender_pos={{row: i, group: group_key, slot: slot_key}}
                   labels={[]}
                   values={[]}

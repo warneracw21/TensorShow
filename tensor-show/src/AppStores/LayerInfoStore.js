@@ -40,8 +40,8 @@ const LayerInfoStoreProvider = ({children}) => {
       },
       layer_params: {
         dataset_name: "",
-        train_set_shape: "",
-        test_set_shape: ""
+        shape: "",
+        labels: ""
       }
     }
   })

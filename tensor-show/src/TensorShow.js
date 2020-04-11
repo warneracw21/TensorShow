@@ -6,8 +6,9 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 // Import Custom Components
 import LayerTree from './Components/LayerTree';
 import AppBar from './Components/Header';
-import EditLayer from './Components/EditLayer';
-import EditModel from './Components/EditModel';
+import EditLayer from './Components/Dialogs/EditLayer';
+import EditModel from './Components/Dialogs/EditModel';
+import ChooseDataset from './Components/Dialogs/ChooseDataset';
 
 // Import Contexts
 import { useEditLayerDialogDispatch } from './AppStores/EditLayerDialogContext';
@@ -15,6 +16,7 @@ import { useEditModelDialogDispatch } from './AppStores/EditModelDialogContext';
 import { useCurrentLayerDispatch } from './AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from './AppStores/LayerInfoStore';
 import { useModelStoreDispatch } from './AppStores/ModelStore';
+import { useChooseDatasetDialogState, useChooseDatasetDialogDispatch } from './AppStores/ChooseDatasetDialogContext';
 
 
 export default function TensorShow() {
@@ -28,6 +30,9 @@ export default function TensorShow() {
   const layerInfoStoreDispatch = useLayerInfoStoreDispatch();
 
   const modelStoreDispatch = useModelStoreDispatch();
+
+  const chooseDatasetDialogState = useChooseDatasetDialogState();
+  const chooseDatasetDialogDispatch = useChooseDatasetDialogDispatch();
 
 
   ////////////////////////////////////////////////
@@ -128,6 +133,19 @@ export default function TensorShow() {
   }
 
   ////////////////////////////////////////////////
+  // Choose Dataset
+  ////////////////////////////////////////////////
+  const chooseDataset = (event) => {
+    event.preventDefault();
+
+    console.log("Choose Dataset")
+
+    chooseDatasetDialogDispatch({open: true})
+  }
+
+
+
+  ////////////////////////////////////////////////
   // Edit Model
   ////////////////////////////////////////////////
   const editModel = (event, model_key) => {
@@ -148,9 +166,17 @@ export default function TensorShow() {
     	<CssBaseline/>
     	<AppBar/>
     	<div style={{position: "absolute", top: "10%"}}>
-      	<LayerTree addChild={addChild} editLayer={editLayer} editModel={editModel}/>
-      	<EditLayer addModel={addModel}/>
-        <EditModel/>
+      	<LayerTree 
+            addChild={addChild} 
+            editLayer={editLayer} 
+            editModel={editModel} 
+            chooseDataset={chooseDataset}
+        />
+      	<EditLayer 
+            addModel={addModel} 
+        />
+        <EditModel />
+        <ChooseDataset />
       </div>
     </div>
   )

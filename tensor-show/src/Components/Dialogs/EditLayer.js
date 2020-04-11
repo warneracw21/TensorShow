@@ -31,10 +31,10 @@ import {
 /////////////////////////////////////////////////
 // Set Up Contexts
 /////////////////////////////////////////////////
-import { useTreePosStoreState, useTreePosStoreDispatch } from '../AppStores/TreePosStore';
-import { useEditLayerDialogState, useEditLayerDialogDispatch } from '../AppStores/EditLayerDialogContext';
-import { useCurrentLayerState, useCurrentLayerDispatch } from '../AppStores/CurrentLayerContext';
-import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from '../AppStores/LayerInfoStore';
+import { useTreePosStoreState, useTreePosStoreDispatch } from '../../AppStores/TreePosStore';
+import { useEditLayerDialogState, useEditLayerDialogDispatch } from '../../AppStores/EditLayerDialogContext';
+import { useCurrentLayerState, useCurrentLayerDispatch } from '../../AppStores/CurrentLayerContext';
+import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from '../../AppStores/LayerInfoStore';
 const NextLayerTypeContext = React.createContext(null);
 const NextLayerParamsContext = React.createContext(null);
 
@@ -432,7 +432,24 @@ export default function EditLayer(params) {
 	// Fully Connected Parameters
 	///////////////////////////////////////////////////////
 	const [outputUnits, setOutputUnits] = React.useState(16)
+	const [disableOutputUnits, setDisableOutputUnits] = React.useState(false);
 	const [lastLayer, setLastLayer] = React.useState(false)
+	const checkLastLayer = () => {
+
+		if (layerInfoStoreState["000"].layer_params.dataset_name === "") {
+			alert("Please Choose a Dataset before Finishing the Model!");
+			return;
+		}
+
+		setLastLayer(!lastLayer);
+
+		if (lastLayer) {
+			setDisableOutputUnits(false)
+		} else {
+			setOutputUnits(layerInfoStoreState["000"].layer_params.labels);
+			setDisableOutputUnits(true);
+		}
+	}
 	const fullParams = (
 		<div>
 			<Typography variant="h6" align="left">Fully Connected Parameters</Typography>
@@ -447,13 +464,14 @@ export default function EditLayer(params) {
 	        helperText="Output Units"
 	        value={outputUnits}
 	        onChange={(event) => setOutputUnits(event.target.value)}
+	        disabled={disableOutputUnits}
 	      />
        	<FormControlLabel
        		className={classes.paramTextField}
 		      control={
 	          <Checkbox
 	            checked={lastLayer}
-	            onChange={() => setLastLayer(!lastLayer)}
+	            onChange={() => checkLastLayer()}
 	            color="secondary"
 	            disabled={disable_last_layer}
 	          />

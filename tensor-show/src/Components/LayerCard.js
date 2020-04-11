@@ -95,13 +95,21 @@ export default function LayerCard(params) {
 
 	const edit_layer_button = (
 		<Button size="small" className={classes.editButton} variant="contained"
-		onClick={(event) => params.editLayer(event, params.sender_pos)}>
+			onClick={(event) => params.editLayer(event, params.sender_pos)}>
 			Edit Layer
 		</Button>
 	);
 
 	const choose_dataset_button = (
-		<Button size="small" className={classes.editButton} variant="contained">
+		<Button size="small" className={classes.editButton} variant="contained"
+			onClick={(event) => params.chooseDataset(event)}>
+			Choose Dataset
+		</Button>
+	);
+
+	const edit_model_button = (
+		<Button size="small" className={classes.editButton} variant="contained"
+			onClick={(event) => params.editModel(event)}>>
 			Choose Dataset
 		</Button>
 	);
@@ -132,23 +140,11 @@ export default function LayerCard(params) {
 		</Paper>
 	);
 
-	switch (params.layerType) {
-		case "input_layer": {
-			return (
-				<Paper className={classes.root}>
-					{header}
-					{content_view}
-					{add_layer_button}
-				</Paper>
-			)
-		}
-	}
-
 	return (
 		<Paper className={classes.root}>
 			{header}
 			{content_view}
-			{add_layer_button}
+			{(params.addChild === undefined) ? null: add_layer_button}
 		</Paper>
 	);
 }

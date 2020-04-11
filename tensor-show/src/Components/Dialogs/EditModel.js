@@ -34,10 +34,10 @@ import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 
 // Import Contexts
-import { useEditModelDialogState, useEditModelDialogDispatch } from '../AppStores/EditModelDialogContext';
-import { useModelStoreState, useModelStoreDispatch } from '../AppStores/ModelStore';
-import { useEditLayerDialogDispatch } from '../AppStores/EditLayerDialogContext';
-import { useCurrentLayerDispatch } from '../AppStores/CurrentLayerContext';
+import { useEditModelDialogState, useEditModelDialogDispatch } from '../../AppStores/EditModelDialogContext';
+import { useModelStoreState, useModelStoreDispatch } from '../../AppStores/ModelStore';
+import { useEditLayerDialogDispatch } from '../../AppStores/EditLayerDialogContext';
+import { useCurrentLayerDispatch } from '../../AppStores/CurrentLayerContext';
 
 const layer_type_map = {
 	"conv_layer": "Convolutional",
