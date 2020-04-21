@@ -19,7 +19,10 @@ const LayerInfoStoreProvider = ({children}) => {
         return state;
       }
       case 'update': {
+        console.log(JSON.parse(JSON.stringify(state)))
         state[[action.layerID]] = Object.assign({}, state[[action.layerID]], action.layer_info);
+                console.log(JSON.parse(JSON.stringify(state)))
+
         return state;
       }
       case 'add_to_model': {

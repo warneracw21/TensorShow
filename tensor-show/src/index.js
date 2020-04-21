@@ -19,19 +19,19 @@ function App() {
      
       <TreePosStoreProvider>
       <CurrentLayerContextProvider>
-      <EditLayerDialogContextProvider>
       <EditModelDialogContextProvider>
       <LayerInfoStoreProvider>
       <ModelStoreProvider>
       <ChooseDatasetDialogContextProvider>
+      <EditLayerDialogContextProvider>
       
           <TensorShow/>
 
+      </EditLayerDialogContextProvider>
       </ChooseDatasetDialogContextProvider>
       </ModelStoreProvider>
       </LayerInfoStoreProvider>
       </EditModelDialogContextProvider>
-      </EditLayerDialogContextProvider>
       </CurrentLayerContextProvider>
       </TreePosStoreProvider>
 

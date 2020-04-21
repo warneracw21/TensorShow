@@ -129,7 +129,7 @@ const propogateWidth = (PositionTree, row_position) => {
   // BASE CASE: Child Row is already 0
   ////////////////////////////////////////////////////////////////////////
   if (parent_row_pos == -1) {
-    // console.log("Returning")
+    // // console.log("Returning")
     return new_tree;
   }
 
@@ -154,11 +154,11 @@ const propogateWidth = (PositionTree, row_position) => {
 }
 
 const deleteNode = (tree, row_pos, group_pos, slot_pos) => {
-  console.log("Deleting from", row_pos, group_pos, slot_pos)
+  // console.log("Deleting from", row_pos, group_pos, slot_pos)
 
   var child_row_key = row_pos + 1;
   if (tree.rows[child_row_key] === undefined) {
-    console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
+    // console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
     delete tree.rows[row_pos].groups[group_pos].slots[slot_pos];
     tree = pruneGroup(tree, row_pos, group_pos)
     tree = pruneRow(tree, row_pos);
@@ -166,7 +166,7 @@ const deleteNode = (tree, row_pos, group_pos, slot_pos) => {
   }
   var child_group_key = `${group_pos}${slot_pos}`;
   if (tree.rows[child_row_key].groups[child_group_key] === undefined) {
-    console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
+    // console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
     delete tree.rows[row_pos].groups[group_pos].slots[slot_pos];
     tree = pruneGroup(tree, row_pos, group_pos)
     tree = pruneRow(tree, row_pos);
@@ -182,13 +182,13 @@ const deleteNode = (tree, row_pos, group_pos, slot_pos) => {
   }
 
   // Always delete the sender
-  console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
+  // console.log("DELETING SLOT", row_pos, group_pos, slot_pos)
   delete tree.rows[row_pos].groups[group_pos].slots[slot_pos];
 
   // Check if we should delete the group
 
   if (Object.keys(tree.rows[row_pos].groups[group_pos].slots).length === 0) {
-    console.log("DELETING GROUP", row_pos, group_pos)
+    // console.log("DELETING GROUP", row_pos, group_pos)
     delete tree.rows[row_pos].groups[group_pos];
   }
 
@@ -200,7 +200,7 @@ const deleteNode = (tree, row_pos, group_pos, slot_pos) => {
 }
 
 const pruneGroup = (tree, row_position, group_pos) => {
-  console.log("Pruning Group From", row_position, group_pos)
+  // console.log("Pruning Group From", row_position, group_pos)
 
   // Iterate over slots in group to see if the group should be pruned
   var slot_keys, slot_key_ind, slot_key;
@@ -220,7 +220,7 @@ const pruneGroup = (tree, row_position, group_pos) => {
   }
 
   if (delete_group) {
-    console.log("DELETING GROUP", row_position, group_pos)
+    // console.log("DELETING GROUP", row_position, group_pos)
     delete tree.rows[row_position].groups[group_pos]
   }
 
@@ -229,7 +229,7 @@ const pruneGroup = (tree, row_position, group_pos) => {
 
 
 const pruneRow = (tree, row_position) => {
-  console.log("Pruning Row From", row_position)
+  // console.log("Pruning Row From", row_position)
 
   var delete_row, delete_group;
   var group_keys, group_key_ind, group_key;
@@ -257,7 +257,7 @@ const pruneRow = (tree, row_position) => {
   }
 
   if (delete_row) {
-    console.log("DELETING ROW", row_position)
+    // console.log("DELETING ROW", row_position)
     delete tree.rows[row_position]
   }
 
@@ -269,12 +269,12 @@ const TreePosReducer = (state, action) => {
 
   switch (action.type) {
     case ('init'): {
-      return state;
+      return JSON.parse(JSON.stringify(state));
     }
 
     case ('delete_node'): {
 
-      console.log('delete')
+      // console.log('delete')
 
       // Make deep copy of old state
       var new_state = {...state};
@@ -295,7 +295,7 @@ const TreePosReducer = (state, action) => {
       
 
       // Delete All Children
-      console.log("Before", JSON.parse(JSON.stringify(new_state)))
+      // console.log("Before", JSON.parse(JSON.stringify(new_state)))
       new_state = deleteNode(new_state, sender_row, sender_group, sender_slot);
 
       // Prune Tree
@@ -329,9 +329,9 @@ const TreePosReducer = (state, action) => {
             
             // Calculate Group Key ROW|GROUP|SLOT
             group_key = `${parent_group_key}${parent_slot_key}`;
-            // console.log(parent_row_key, parent_group_key, parent_slot_key)
-            // console.log(group_key)
-            // console.log(JSON.parse(JSON.stringify(new_state)))
+            // // console.log(parent_row_key, parent_group_key, parent_slot_key)
+            // // console.log(group_key)
+            // // console.log(JSON.parse(JSON.stringify(new_state)))
 
             // Check if this key is in the child row's groups
             // // We do not want to create a new group if we do not have to
@@ -367,7 +367,7 @@ const TreePosReducer = (state, action) => {
       }
 
       // Propogate Widths back up Tree
-      console.log("After", JSON.parse(JSON.stringify(new_state)))
+      // console.log("After", JSON.parse(JSON.stringify(new_state)))
       var maximum_row = Math.max(...Object.keys(new_state.rows).map(i => parseInt(i, 10)))
       new_state = propogateWidth(
         {...new_state}, 
@@ -453,9 +453,9 @@ const TreePosReducer = (state, action) => {
             
             // Calculate Group Key ROW|GROUP|SLOT
             group_key = `${parent_group_key}${parent_slot_key}`;
-            // console.log(parent_row_key, parent_group_key, parent_slot_key)
-            // console.log(group_key)
-            // console.log(JSON.parse(JSON.stringify(new_state)))
+            // // console.log(parent_row_key, parent_group_key, parent_slot_key)
+            // // console.log(group_key)
+            // // console.log(JSON.parse(JSON.stringify(new_state)))
 
             // Check if this key is in the child row's groups
             // // We do not want to create a new group if we do not have to

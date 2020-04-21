@@ -57,7 +57,8 @@ export default function TensorShow() {
 
     
     // Get Layer Parameters
-    var layer_params = model_layers.map(layer_pos_key => {
+    var layer_params = [];
+    var layerIDs = model_layers.map(layer_pos_key => {
 
       layerInfoStoreDispatch({
         type: 'add_to_model',
@@ -65,17 +66,21 @@ export default function TensorShow() {
         model_key: model_key
       })
 
-      return layerInfoStoreState[layer_pos_key]
+      layer_params.push(layerInfoStoreState[layer_pos_key])
+      return layer_pos_key;
     });
 
-    layer_params.reverse()
+    layerIDs.reverse();
+    layer_params.reverse();
+
+    console.log(layerIDs)
 
     // Update the ModelStore
     modelStoreDispatch({
       type: 'add_model', 
       model_key: model_key,
       model_name: model_name,
-      layer_params: layer_params
+      layerIDs: layerIDs
     })
 
 
@@ -130,6 +135,7 @@ export default function TensorShow() {
 
     // Open Dialog
     dialogDispatch({open: true, dialog_type: "edit"})
+
   }
 
   ////////////////////////////////////////////////
@@ -137,8 +143,6 @@ export default function TensorShow() {
   ////////////////////////////////////////////////
   const chooseDataset = (event) => {
     event.preventDefault();
-
-    console.log("Choose Dataset")
 
     chooseDatasetDialogDispatch({open: true})
   }

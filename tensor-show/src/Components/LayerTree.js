@@ -17,6 +17,9 @@ import { useLayerInfoStoreState } from '../AppStores/LayerInfoStore';
 ///////////////////////////////////////////////////////////
 export default function LayerTree(params) {
 
+  console.log("==== BEGIN RENDERING =====")
+  console.log("Rendering Layer Tree")
+
   ////////////////////////////////////////////////
   // Subscribe to Tree Contexts
   ////////////////////////////////////////////////
@@ -93,77 +96,21 @@ export default function LayerTree(params) {
         }
 
         if (slot.render) {
-          layer_info = layerInfoStoreState[`${row_key}${group_key}${slot_key}`]
-          if (layer_info === undefined) {
-            console.log(`${row_key}${group_key}${slot_key}`)
-          }
-          // Add Input Card
-          if (layer_info.layer_type === "input_layer") {
-            slot_svg = (
-              <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-                <LayerCard
-                  layerType={layer_info.layer_type}
-                  layerName={"Input Layer"}
-                  addChild={addChild}
-                  chooseDataset={chooseDataset}
-                  sender_pos={{row: i, group: group_key, slot: slot_key}}
-                  labels={["Dataset Name", "Shape", "Labels"]}
-                  values={[layer_info.layer_params.dataset_name,
-                           layer_info.layer_params.shape,
-                           layer_info.layer_params.labels]}
-                />
-              </div>
-            );
 
-          // Add Model Card
-          } else if (layer_info.layer_type === "model") {
-            slot_svg = (
-              <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-                <LayerCard
-                  layerType={layer_info.layer_type}
-                  layerName={layer_info.layer_name}
-                  editModel={editModel}
-                  sender_pos={{row: i, group: group_key, slot: slot_key}}
-                  labels={[]}
-                  values={[]}
-                />
-              </div>
-            );
+          // Add Generic Layer Card
+          slot_svg = (
+            <div style={style} key={`${row_key}${group_key}${slot_key}`}>
+              <LayerCard
+                layerID={`${row_key}${group_key}${slot_key}`}
+                addChild={addChild}
+                editLayer={editLayer}
+                editModel={editModel}
+                chooseDataset={chooseDataset}
+                sender_pos={{row: row_key, group: group_key, slot: slot_key}}
+              />
+            </div>
+          );
 
-
-          // Add layer card without Add Layer
-          } else if ((layer_info.layer_type === "full_layer") & (layer_info.layer_params.last_layer)) {
-            slot_svg = (
-              <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-                <LayerCard
-                  layerType={layer_info.layer_type}
-                  layerName={layer_info.layer_name}
-                  editLayer={editLayer}
-                  sender_pos={{row: i, group: group_key, slot: slot_key}}
-                  labels={[]}
-                  values={[]}
-                />
-              </div>
-            );
-          } 
-
-
-          else {
-
-          // Add Layer Card
-            slot_svg = (
-              <div style={style} key={`${row_key}${group_key}${slot_key}`}>
-                <LayerCard
-                  addChild={addChild}
-                  editLayer={editLayer}
-                  sender_pos={{row: i, group: group_key, slot: slot_key}}
-                  layerName={layer_info.layer_name}
-                  labels={[]}
-                  values={[]}
-                />
-              </div>
-            );
-          }
           slot_svgs.push(slot_svg)
           
           // Check if next row exists

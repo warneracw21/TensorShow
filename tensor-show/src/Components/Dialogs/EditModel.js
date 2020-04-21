@@ -38,6 +38,8 @@ import { useEditModelDialogState, useEditModelDialogDispatch } from '../../AppSt
 import { useModelStoreState, useModelStoreDispatch } from '../../AppStores/ModelStore';
 import { useEditLayerDialogDispatch } from '../../AppStores/EditLayerDialogContext';
 import { useCurrentLayerDispatch } from '../../AppStores/CurrentLayerContext';
+import { useTreePosStoreState } from '../../AppStores/TreePosStore';
+import { useLayerInfoStoreState } from '../../AppStores/LayerInfoStore';
 
 const layer_type_map = {
 	"conv_layer": "Convolutional",
@@ -131,9 +133,6 @@ const useStyles = makeStyles(theme => ({
 
 }));
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
 
 export default function EditModel() {
   const classes = useStyles();
@@ -146,6 +145,9 @@ export default function EditModel() {
   const currentLayerDispatch = useCurrentLayerDispatch();
 
   const modelStoreState = useModelStoreState();
+
+  const treePosState = useTreePosStoreState();
+  const layerInfoState = useLayerInfoStoreState();
 
   // Handle Dialog Opening and Closing
   const handleClickOpen = () => {
@@ -197,7 +199,7 @@ export default function EditModel() {
 
   }
 
-  const layer_params = model.layer_params;
+  const layerIDs = model.layerIDs;
   const checkAddButton = (param) => {
    	if (param.layer_type === 'input_layer') {
    		return null
@@ -208,18 +210,21 @@ export default function EditModel() {
   const layer_list = (
   	<div style={{width: "100%"}}>
   	<List>
-      {layer_params.map((param, index) => (
-        <ListItem key={index}>
-          <ListItemText
-          	primary={`${index + 1}: ${param.layer_name}`}
-          	secondary={layer_type_map[param.layer_type] + ' Layer'}
-          />
-           {checkAddButton(param)}
-          
-        </ListItem>
-      ))}
+      {layerIDs.map((layerID, index) => {
+        let param = layerInfoState[layerID]
+        return (
+          <ListItem key={index}>
+            <ListItemText
+            	primary={`${index + 1}: ${param.layer_name}`}
+            	secondary={layer_type_map[param.layer_type] + ' Layer'}
+            />
+             {checkAddButton(param)}
+            
+          </ListItem>)
+      })}
     </List>
     </div>
+
   );
 
   ///////////////////////////////////////////////

@@ -166,8 +166,6 @@ export default function EditLayer(params) {
 		const connection_pos = active_connections.length;
 		const new_sender_pos = {...sender_pos, connection: connection_pos}
 
-		console.log(new_sender_pos)
-
 		// Add Child Position to Position Tree
 		treePosDispatch({
 			type: 'add_child', 
@@ -290,6 +288,11 @@ export default function EditLayer(params) {
 				layer_params: next_layer_params
 			}
 		})
+
+		console.log("HERE")
+
+		treePosDispatch({type: 'init'});
+		currentLayerDispatch({sender_pos: sender_pos});
 
 		// Close Dialog
 		dialogDispatch({open: false});

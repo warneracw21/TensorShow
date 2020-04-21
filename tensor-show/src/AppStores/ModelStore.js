@@ -13,7 +13,7 @@ const ModelStoreProvider = ({children}) => {
 				state[[action.model_key]] = {
 					status: 'init',
 					model_name: action.model_name,
-					layer_params: action.layer_params
+					layerIDs: action.layerIDs
 				}
 
 				console.log(state)

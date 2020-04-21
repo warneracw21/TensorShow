@@ -90,11 +90,10 @@ export default function ChooseDataset() {
 
   // Subscribe to Context
   const { open } = useChooseDatasetDialogState();
-  console.log(open)
   const datasetDialogDispatch = useChooseDatasetDialogDispatch();
 
   const layerInfoStore = useLayerInfoStoreState();
-  const layerInfoDispatch = useLayerInfoStoreDispatch();
+  const layerInfoStoreDispatch = useLayerInfoStoreDispatch();
 
 
   const handleClose = () => {
@@ -143,7 +142,7 @@ export default function ChooseDataset() {
     }
 
     // Update Input Layer Parameters
-    layerInfoDispatch({
+    layerInfoStoreDispatch({
       type: 'update',
       layerID: "000",
       layer_info: {
