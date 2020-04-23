@@ -35,8 +35,7 @@ import { useTreePosStoreState, useTreePosStoreDispatch } from '../../AppStores/T
 import { useEditLayerDialogState, useEditLayerDialogDispatch } from '../../AppStores/EditLayerDialogContext';
 import { useCurrentLayerState, useCurrentLayerDispatch } from '../../AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from '../../AppStores/LayerInfoStore';
-const NextLayerTypeContext = React.createContext(null);
-const NextLayerParamsContext = React.createContext(null);
+import { useModelStoreDispatch } from '../../AppStores/ModelStore';
 
 
 /////////////////////////////////////////////////
@@ -120,6 +119,8 @@ export default function EditLayer(params) {
 
 	const layerInfoStoreState = useLayerInfoStoreState();
 	const layerInfoStoreDispatch = useLayerInfoStoreDispatch();
+
+	const modelStoreDispatch = useModelStoreDispatch();
 
 	////////////////////////////////////////////////
 	// Calculate Sender Information
@@ -279,6 +280,7 @@ export default function EditLayer(params) {
 			}
 		}
 
+		// Update Layer Info Store
 		layerInfoStoreDispatch({
 			type: 'update', 
 			layerID: sender_pos_key, 
@@ -289,9 +291,19 @@ export default function EditLayer(params) {
 			}
 		})
 
-		console.log("HERE")
+		// Update Model if in Model
+		if (sender_info.inModel) {
+			params.editModelLayer({
+				model_key: sender_info.inModel,
+				layer_key: sender_pos_key
+			})
+		}
+		
 
+		// HACK (forces UI Update)
 		treePosDispatch({type: 'init'});
+
+		// Update Current Layer to be the current layer
 		currentLayerDispatch({sender_pos: sender_pos});
 
 		// Close Dialog
@@ -321,6 +333,15 @@ export default function EditLayer(params) {
 			type: 'delete',
 			layerID: sender_pos_key
 		})
+
+		// Check if the layer is in a model
+		if (sender_info.inModel) {
+			modelStoreDispatch({
+				type: 'delete_model',
+				modelID: sender_info.inModel
+			})
+		}
+
 
 		// Set currentLayer to parent
 		currentLayerDispatch({sender_pos: parent_pos});
@@ -380,7 +401,7 @@ export default function EditLayer(params) {
 	        value={windowHeight}
 	        onChange={(event) => setWindowHeight(event.target.value)}
 	      />
-      	<TextField
+      	{nextLayerType === "pool_layer" ? null: <TextField
       		className={classes.paramTextField}
 	        type="number"
 	        InputLabelProps={{
@@ -390,7 +411,7 @@ export default function EditLayer(params) {
 	        helperText="Window Channels"
 	        value={windowChannels}
 	        onChange={(event) => setWindowChannels(event.target.value)}
-	      />
+	      />}
 	     </div>
 
 		</div>
@@ -510,6 +531,7 @@ export default function EditLayer(params) {
 	          labelId="activation-type-select-label"
 	          variant="outlined"
 	          value={activationType}
+	          disabled={disableOutputUnits}
 	          onChange={(event) => setActivationType(event.target.value)}
 	        >
 	          {activation_types.map(i => (
@@ -522,6 +544,7 @@ export default function EditLayer(params) {
 	        	style={{minWidth: 150}}
 	          labelId="activation-type-select-label"
 	          variant="outlined"
+	          disabled={disableOutputUnits}
 	          value={regularizationType}
 	          onChange={(event) => setRegularizationType(event.target.value)}
 	        >
@@ -537,8 +560,8 @@ export default function EditLayer(params) {
 	///////////////////////////////////////////////////////
 	// Pooling Parameters
 	///////////////////////////////////////////////////////
-	const pooling_types = ["None", "Maximum Pooling", "Average Pooling", "Minimum Pooling"]
-	const [poolingType, setPoolingType] = React.useState("None")
+	const pooling_types = ["Maximum Pooling", "Average Pooling"]
+	const [poolingType, setPoolingType] = React.useState(pooling_types[0])
 	const poolingParams = (
 		<div>
 			<Typography variant="h6" align="left">Pooling Parameter</Typography>
@@ -679,6 +702,7 @@ export default function EditLayer(params) {
 
 		// Always set last layer to false
 		setLastLayer(false);
+		setDisableOutputUnits(false)
 
 		// In Edit Mode -> set layer name to saved layer name
 		if (dialog_type === 'edit') {
@@ -714,9 +738,11 @@ export default function EditLayer(params) {
 
 			// In Dense Type -> Set Output, Last Layer, Acrtivation and Regularization
 			else if (sender_layer_type === 'full_layer') {
+				console.log(sender_layer_params.last_layer)
 				setOutputUnits(sender_layer_params.output.units)
 				setLastLayer(sender_layer_params.last_layer)
 				setActivationType(sender_layer_params.activation)
+				setDisableOutputUnits(lastLayer)
 				setRegularizationType(sender_layer_params.regularization)
 			}
 		}

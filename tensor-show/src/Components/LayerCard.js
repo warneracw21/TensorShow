@@ -249,7 +249,7 @@ export default function LayerCard(params) {
 	const edit_model_button = (
 		<Button size="small" className={classes.editButton} variant="contained"
 			onClick={(event) => params.editModel(event, params.layerID)}>
-			Edit Model
+			View Model
 		</Button>
 	);
 

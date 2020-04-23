@@ -275,9 +275,18 @@ export default function EditModel() {
 	          shrink: true,
 	        }}
 	        variant="outlined"
-	        helperText="Number of Epochs"
+	        helperText="Batch Size"
 	      />
-	    </div>
+        <TextField
+          className={classes.paramTextField}
+          type="number"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          variant="outlined"
+          helperText="Number of Epochs"
+        />
+      </div>
 	    <div className={classes.paramTextFieldGroup}>
 		    <Button style={{margin: 10}} variant="contained">
 				  Train Model

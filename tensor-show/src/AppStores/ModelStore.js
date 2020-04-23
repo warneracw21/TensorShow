@@ -21,7 +21,7 @@ const ModelStoreProvider = ({children}) => {
 			}
 
 			case 'delete_model': {
-				delete state[[action.model_key]]
+				delete state[[action.modelID]]
 				return state;
 			}
 

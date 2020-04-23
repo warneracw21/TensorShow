@@ -17,9 +17,6 @@ import { useLayerInfoStoreState } from '../AppStores/LayerInfoStore';
 ///////////////////////////////////////////////////////////
 export default function LayerTree(params) {
 
-  console.log("==== BEGIN RENDERING =====")
-  console.log("Rendering Layer Tree")
-
   ////////////////////////////////////////////////
   // Subscribe to Tree Contexts
   ////////////////////////////////////////////////

@@ -1,5 +1,7 @@
 import React from 'react';
 
+import io from 'socket.io-client';
+
 // Import Material-UI Components
 import CssBaseline from '@material-ui/core/CssBaseline';
 
@@ -10,14 +12,16 @@ import EditLayer from './Components/Dialogs/EditLayer';
 import EditModel from './Components/Dialogs/EditModel';
 import ChooseDataset from './Components/Dialogs/ChooseDataset';
 
+// Import client code
+import { emitModel } from './client'
+
 // Import Contexts
 import { useEditLayerDialogDispatch } from './AppStores/EditLayerDialogContext';
 import { useEditModelDialogDispatch } from './AppStores/EditModelDialogContext';
 import { useCurrentLayerDispatch } from './AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from './AppStores/LayerInfoStore';
-import { useModelStoreDispatch } from './AppStores/ModelStore';
+import { useModelStoreState, useModelStoreDispatch } from './AppStores/ModelStore';
 import { useChooseDatasetDialogState, useChooseDatasetDialogDispatch } from './AppStores/ChooseDatasetDialogContext';
-
 
 export default function TensorShow() {
 
@@ -29,6 +33,7 @@ export default function TensorShow() {
   const layerInfoStoreState = useLayerInfoStoreState();
   const layerInfoStoreDispatch = useLayerInfoStoreDispatch();
 
+  const modelStoreState = useModelStoreState();
   const modelStoreDispatch = useModelStoreDispatch();
 
   const chooseDatasetDialogState = useChooseDatasetDialogState();
@@ -84,29 +89,27 @@ export default function TensorShow() {
     })
 
 
+    emitModel({
+      model_key: model_key,
+      layer_params: layer_params
+    })
+  }
 
-    // Call Save Model Route on API
-    const url = 'http://0.0.0.0:5000/' + 'save'
-    const fetchData = async () => {
+  const editModelLayer = ({model_key, layer_key}) => {
+    // Given layer_key, update model on server
 
-      try {
-        const response = await fetch(url, {
-            method: 'POST',
-            body: JSON.stringify({
-              message: "TensorShow is Awesome",
-              modelKey: model_key,
-              modelLayers: layer_params
-            })
-          }).then((resp) => {
-            console.log(resp.json())
-            return resp.json()
-          })
-      } catch (error) {
-      }
-      
+    const model_params = modelStoreState[model_key];
+    const layerIDs = model_params.layerIDs;
+
+    let layer_params = []
+    for (var i=0; i<layerIDs.length; i++) {
+      layer_params.push(layerInfoStoreState[layerIDs[i]])
     }
-    fetchData();
 
+    emitModel({
+      model_key: model_key,
+      layer_params: layer_params
+    })
 
   }
 
@@ -177,7 +180,8 @@ export default function TensorShow() {
             chooseDataset={chooseDataset}
         />
       	<EditLayer 
-            addModel={addModel} 
+            addModel={addModel}
+            editModelLayer={editModelLayer}
         />
         <EditModel />
         <ChooseDataset />
