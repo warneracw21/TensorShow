@@ -10,7 +10,7 @@ dataset_shapes = {
 def build_input_layer(params):
 	input_shape = dataset_shapes[params['dataset_name']]
 	return tf.keras.Input(
-		shape=input_shape, name=params['dataset_name'])
+		shape=input_shape)
 
 
 def build_conv_layer(params):
