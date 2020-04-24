@@ -8,6 +8,15 @@ const emitModel = ({ model_key, layer_params }) => {
 	}})
 }
 
+const emitTrain = ({ model_key, num_epochs, batch_size, optimizer_type }) => {
+	socket.emit("train_new_model", {data: {
+		model_key: model_key,
+		num_epochs: num_epochs,
+		batch_size: batch_size,
+		optimizer_type: optimizer_type
+	}})
+}
 
 
-export { socket, emitModel }
+
+export { socket, emitModel, emitTrain }

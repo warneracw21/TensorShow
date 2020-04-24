@@ -22,6 +22,10 @@ import {
  	ListItemIcon,
  	ListItemSecondaryAction,
  	TextField,
+  FormControl,
+  FormHelperText,
+  Select,
+  MenuItem,
  	Paper,
  	Slide } from '@material-ui/core';
 
@@ -53,38 +57,8 @@ const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
   },
-  appBar: {
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginRight: drawerWidth,
-  },
   title: {
     flexGrow: 1,
-  },
-  hide: {
-    display: 'none',
-  },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-  },
-  drawerPaper: {
-    width: drawerWidth,
-  },
-  drawerHeader: {
-    alignItems: 'center',
-    padding: theme.spacing(0, 1),
-    ...theme.mixins.toolbar,
-    justifyContent: 'flex-start',
   },
 
   modelActionPanel: {
@@ -130,11 +104,16 @@ const useStyles = makeStyles(theme => ({
 		margin: theme.spacing(1),
 		minWidth: 120
 	},
+  layerTypeSelectControl: {
+    display: "block",
+    margin: theme.spacing(1),
+    minWidth: 150,
+  },
 
 }));
 
 
-export default function EditModel() {
+export default function EditModel(params) {
   const classes = useStyles();
 
   // Subscribe to Contexts
@@ -149,6 +128,12 @@ export default function EditModel() {
   const treePosState = useTreePosStoreState();
   const layerInfoState = useLayerInfoStoreState();
 
+  // Set Component Hooks
+  const [numEpochs, setNumEpochs] = React.useState(100)
+  const [batchSize, setBatchSize] = React.useState(256)
+  const [optimizerType, setOptimizerType] = React.useState("Gradient Descent");
+  const [openViewLayers, setOpenViewLayers] = React.useState(false)
+
   // Handle Dialog Opening and Closing
   const handleClickOpen = () => {
     editModelDialogDispatch({open: true, modek_key: null})
@@ -158,24 +143,14 @@ export default function EditModel() {
     editModelDialogDispatch({open: false, modek_key: null})
   };
 
-  // Set Up Layer Drawer
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
-
-  const handleDrawerOpen = () => {
-    setDrawerOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setDrawerOpen(false);
-  };
-
-
-
-
-  ///////////////////////////////////////////////
-  // Set Component Hooks
-  ///////////////////////////////////////////////
-  const [openViewLayers, setOpenViewLayers] = React.useState(false);
+  const handleTrain = () => {
+    params.trainModel({
+      model_key: model_key,
+      num_epochs: numEpochs,
+      batch_size: batchSize,
+      optimizer_type: optimizerType
+    })
+  }
 
 
 
@@ -241,6 +216,10 @@ export default function EditModel() {
   	)
 
 
+  
+  const optimizer_types = ["Gradient Descent", "Adagrad", "RMSProp", "Adam"]
+
+
   ///////////////////////////////////////////////
   // Model Information Window
   ///////////////////////////////////////////////
@@ -275,6 +254,8 @@ export default function EditModel() {
 	          shrink: true,
 	        }}
 	        variant="outlined"
+          value={batchSize}
+          onChange={(event) => setBatchSize(event.target.value)}
 	        helperText="Batch Size"
 	      />
         <TextField
@@ -284,11 +265,29 @@ export default function EditModel() {
             shrink: true,
           }}
           variant="outlined"
+          value={numEpochs}
+          onChange={(event) => setNumEpochs(event.target.value)}
           helperText="Number of Epochs"
         />
       </div>
+      <div className={classes.paramTextFieldGroup}>
+        <FormControl className={classes.layerTypeSelectControl}>
+          <Select
+            style={{minWidth: 150}}
+            labelId="activation-type-select-label"
+            variant="outlined"
+            value={optimizerType}
+            onChange={(event) => setOptimizerType(event.target.value)}
+          >
+            {optimizer_types.map(i => (
+              <MenuItem value={i}>{i}</MenuItem>))}
+          </Select>
+          <FormHelperText>Select Optimizer</FormHelperText>
+        </FormControl>
+      </div>
 	    <div className={classes.paramTextFieldGroup}>
-		    <Button style={{margin: 10}} variant="contained">
+		    <Button style={{margin: 10}} variant="contained"
+          onClick={handleTrain}>
 				  Train Model
 				</Button>
 				<Button style={{margin: 10}} variant="contained" disabled>
@@ -338,23 +337,6 @@ export default function EditModel() {
 	      	{training_window}
 	      	{testing_window}
 	      </DialogContent>
-	      <Drawer
-	        className={classes.drawer}
-	        variant="persistent"
-	        anchor="right"
-	        open={drawerOpen}
-	        classes={{
-	          paper: classes.drawerPaper,
-	        }}
-	      >
-	        <div className={classes.drawerHeader}>
-	          <IconButton onClick={handleDrawerClose}>
-	             <ChevronRightIcon />
-	          </IconButton>
-	        </div>
-	        <Divider />
-	        {layer_list}
-	      </Drawer>
       </Dialog>
     </div>
   );

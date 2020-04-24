@@ -13,7 +13,7 @@ import EditModel from './Components/Dialogs/EditModel';
 import ChooseDataset from './Components/Dialogs/ChooseDataset';
 
 // Import client code
-import { emitModel } from './client'
+import { socket, emitModel, emitTrain } from './client'
 
 // Import Contexts
 import { useEditLayerDialogDispatch } from './AppStores/EditLayerDialogContext';
@@ -22,6 +22,7 @@ import { useCurrentLayerDispatch } from './AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from './AppStores/LayerInfoStore';
 import { useModelStoreState, useModelStoreDispatch } from './AppStores/ModelStore';
 import { useChooseDatasetDialogState, useChooseDatasetDialogDispatch } from './AppStores/ChooseDatasetDialogContext';
+import { useModelTrainStoreState, useModelTrainStoreDispatch } from './AppStores/ModelTrainStore';
 
 export default function TensorShow() {
 
@@ -38,6 +39,23 @@ export default function TensorShow() {
 
   const chooseDatasetDialogState = useChooseDatasetDialogState();
   const chooseDatasetDialogDispatch = useChooseDatasetDialogDispatch();
+
+  const modelTrainStoreState = useModelTrainStoreState();
+  const modelTrainStoreDispatch = useModelTrainStoreDispatch();
+
+  // Set up Socket Listeners
+  // React.useEffect(() => {
+
+    console.log(socket)
+    socket.on("begin_of_epoch", (data) => {
+      console.log(data)
+    })
+
+  // })
+
+
+
+
 
 
   ////////////////////////////////////////////////
@@ -113,6 +131,19 @@ export default function TensorShow() {
 
   }
 
+  const trainModel = ({ model_key, num_epochs, batch_size, optimizer_type }) => {
+
+    // Emit the new model to server for training
+    emitTrain({
+      model_key: model_key,
+      num_epochs: num_epochs,
+      batch_size: batch_size,
+      optimizer_type: optimizer_type
+    })
+
+    // Add the model to TrainModelStore
+  }
+
   ////////////////////////////////////////////////
   // Add Child
   ////////////////////////////////////////////////
@@ -183,7 +214,7 @@ export default function TensorShow() {
             addModel={addModel}
             editModelLayer={editModelLayer}
         />
-        <EditModel />
+        <EditModel trainModel={trainModel}/>
         <ChooseDataset />
       </div>
     </div>
