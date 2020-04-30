@@ -63,12 +63,16 @@ class TensorShowCallback(Callback):
         )
 
     def on_train_batch_end(self, batch, logs):
+        print(logs)
         self.dispatch(
             self.model_key,
             "end_of_batch",
             {
                 'batch': self.batch_ind,
                 'epoch': self.current_epoch,
+                'loss': str(logs['loss']),
+                'accuracy': str(logs['sparse_categorical_accuracy'])
+                
             }
         )
 

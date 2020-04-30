@@ -28,8 +28,6 @@ def handle_add_new_model(json):
   model.summary()
 
   saved_model_store[model_data["model_key"]] = model
-  pprint(saved_model_store)
-
 
 
 @socket.on('train_new_model')
@@ -38,7 +36,7 @@ def handle_train_new_model(json):
   model_key = train_params['model_key']
 
   def tensorshow_callback(model_key, event, data):
-    print("Emiting", event)
+    print(data)
     return socket.emit(
       event,
       {
@@ -62,6 +60,16 @@ def handle_train_new_model(json):
     epochs=10,
     validation_data=(x_val, y_val),
     callbacks=[tensorshow_callback])
+
+@socket.on("request_model_file")
+def handle_request_model_file(json):
+  print(json)
+  model_key = json['data']['model_key']
+
+  socket.emit("emit_model_file", {
+      "model_key": model_key,
+      "model_file": saved_model_store[model_key].to_json()
+    })
 
 
 @socket.on('connect')
