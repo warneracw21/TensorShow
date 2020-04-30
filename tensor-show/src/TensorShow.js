@@ -13,7 +13,7 @@ import EditModel from './Components/Dialogs/EditModel';
 import ChooseDataset from './Components/Dialogs/ChooseDataset';
 
 // Import client code
-import { socket, emitModel, emitTrain } from './client'
+import { socket, emitModel, emitTrain, requestModelFile } from './client'
 
 // Import Contexts
 import { useEditLayerDialogDispatch } from './AppStores/EditLayerDialogContext';
@@ -22,7 +22,8 @@ import { useCurrentLayerDispatch } from './AppStores/CurrentLayerContext';
 import { useLayerInfoStoreState, useLayerInfoStoreDispatch } from './AppStores/LayerInfoStore';
 import { useModelStoreState, useModelStoreDispatch } from './AppStores/ModelStore';
 import { useChooseDatasetDialogState, useChooseDatasetDialogDispatch } from './AppStores/ChooseDatasetDialogContext';
-import { useModelTrainStoreState, useModelTrainStoreDispatch } from './AppStores/ModelTrainStore';
+import { useServeModelFileDispatch } from './AppStores/ServeModelFileContext';
+
 
 export default function TensorShow() {
 
@@ -40,22 +41,34 @@ export default function TensorShow() {
   const chooseDatasetDialogState = useChooseDatasetDialogState();
   const chooseDatasetDialogDispatch = useChooseDatasetDialogDispatch();
 
-  const modelTrainStoreState = useModelTrainStoreState();
-  const modelTrainStoreDispatch = useModelTrainStoreDispatch();
+  const serveModelFileDispatch = useServeModelFileDispatch();
 
   // Set up Socket Listeners
-  // React.useEffect(() => {
+  React.useEffect(() => {
 
-    console.log(socket)
-    socket.on("begin_of_epoch", (data) => {
-      console.log(data)
+    socket.on("emit_model_file", (data) => {
+      console.log("Received Model File")
+
+      serveModelFileDispatch({
+        model_key: data.model_key,
+        model_file: data.model_file
+      })
     })
 
-  // })
 
+    socket.on("training_end", (data) => {
+      console.log("Train End")
 
+      modelStoreDispatch({
+        type: "update_status",
+        model_key: data.model_key,
+        status: "trained"
+      })
+    })
 
+   
 
+  })
 
 
   ////////////////////////////////////////////////
@@ -144,6 +157,13 @@ export default function TensorShow() {
     // Add the model to TrainModelStore
   }
 
+  const reqModelFile = ({ model_key }) => {
+
+    requestModelFile({
+      model_key: model_key
+    })
+  }
+
   ////////////////////////////////////////////////
   // Add Child
   ////////////////////////////////////////////////
@@ -214,7 +234,7 @@ export default function TensorShow() {
             addModel={addModel}
             editModelLayer={editModelLayer}
         />
-        <EditModel trainModel={trainModel}/>
+        <EditModel trainModel={trainModel} reqModelFile={reqModelFile}/>
         <ChooseDataset />
       </div>
     </div>

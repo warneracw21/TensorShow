@@ -44,6 +44,9 @@ import { useEditLayerDialogDispatch } from '../../AppStores/EditLayerDialogConte
 import { useCurrentLayerDispatch } from '../../AppStores/CurrentLayerContext';
 import { useTreePosStoreState } from '../../AppStores/TreePosStore';
 import { useLayerInfoStoreState } from '../../AppStores/LayerInfoStore';
+import { useModelTrainStoreState, useModelTrainStoreDispatch } from '../../AppStores/ModelTrainStore';
+import { useServeModelFileState } from '../../AppStores/ServeModelFileContext';
+
 
 const layer_type_map = {
 	"conv_layer": "Convolutional",
@@ -110,6 +113,27 @@ const useStyles = makeStyles(theme => ({
     minWidth: 150,
   },
 
+  resultsWindow: {
+    display: 'flex',
+    justifyContent: 'space-evenly',
+    height: 600,
+    width: 1200,
+  },
+
+  lossGraphWindow: {
+    height: 500,
+    width: 500,
+    backgroundColor: '#FF00FF'
+  },
+
+  accuracyGraphWindow: {
+    height: 500,
+    width: 500,
+    backgroundColor: '#FF00FF'
+  }
+
+
+
 }));
 
 
@@ -128,11 +152,18 @@ export default function EditModel(params) {
   const treePosState = useTreePosStoreState();
   const layerInfoState = useLayerInfoStoreState();
 
+  const serveModelFileState = useServeModelFileState();
+
+  // const modelTrainStoreState = useModelTrainStoreState();
+  // const modelTrainStoreDispatch = useModelTrainStoreDispatch();
+
   // Set Component Hooks
   const [numEpochs, setNumEpochs] = React.useState(100)
   const [batchSize, setBatchSize] = React.useState(256)
   const [optimizerType, setOptimizerType] = React.useState("Gradient Descent");
-  const [openViewLayers, setOpenViewLayers] = React.useState(false)
+  const [openViewLayers, setOpenViewLayers] = React.useState(false);
+  const [openViewResults, setOpenViewResults] = React.useState(false);
+
 
   // Handle Dialog Opening and Closing
   const handleClickOpen = () => {
@@ -152,13 +183,26 @@ export default function EditModel(params) {
     })
   }
 
-
+  React.useEffect(() => {
+    console.log("model store changed")
+  }, [modelStoreState[model_key]])
 
   // Extract Model
   const model = modelStoreState[model_key];
   if (model === undefined) {
   	return <div/>;
   }
+
+  console.log(model)
+
+  if (model["status"] == "init") {
+    console.log("init")
+  }
+
+  if (model["status"] == "trained") {
+    console.log("trained")
+  }
+
 
   ///////////////////////////////////////////////
   // Calculate Layer List
@@ -215,14 +259,20 @@ export default function EditModel(params) {
 
   	)
 
-
-  
-  const optimizer_types = ["Gradient Descent", "Adagrad", "RMSProp", "Adam"]
-
-
   ///////////////////////////////////////////////
   // Model Information Window
   ///////////////////////////////////////////////
+  const getModelDownload = () => {
+    if (serveModelFileState === null) {
+      return <div/>
+    } else {
+      const onClickFunction = () => {
+        var fileDownload = require('react-file-download');
+        fileDownload(serveModelFileState.model_file, 'model.json');
+      }
+      return <Button onClick={onClickFunction}>Click Here</Button>
+    }
+  }
   const model_info_window = (
   	<div>
   		<Typography variant="h6" align="left">Model Information</Typography>
@@ -232,17 +282,27 @@ export default function EditModel(params) {
 	        label="Model Name"
 	        defaultValue={model.model_name}
 	      />
-	      <Button 
-	      	style={{margin: 10}} 
-	      	variant="contained" 
-	      	onClick={() => setOpenViewLayers(true)}>View Layers</Button>
-	    	</div>
 	    </div>
+      <div className={classes.paramTextFieldGroup}>
+        <Button style={{margin: 10}} variant="contained" 
+          onClick={() => setOpenViewLayers(true)}>
+          View Layers
+        </Button>
+        <Button style={{margin: 10}} variant="contained"
+          onClick={() => params.reqModelFile({model_key})}>
+          Download Model
+        </Button>
+      </div>
+      <div className={classes.paramTextFieldGroup}>
+        {getModelDownload()}
+      </div>
+    </div>
 	 	);
 
   ///////////////////////////////////////////////
   // Training Window
   ///////////////////////////////////////////////
+  const optimizer_types = ["Gradient Descent", "Adagrad", "RMSProp", "Adam"]
   const training_window = (
   	<div>
 			<Typography variant="h6" align="left">Training Parameters</Typography>
@@ -285,15 +345,15 @@ export default function EditModel(params) {
           <FormHelperText>Select Optimizer</FormHelperText>
         </FormControl>
       </div>
-	    <div className={classes.paramTextFieldGroup}>
+      <div className={classes.paramTextFieldGroup}>
 		    <Button style={{margin: 10}} variant="contained"
           onClick={handleTrain}>
 				  Train Model
 				</Button>
-				<Button style={{margin: 10}} variant="contained" disabled>
-				  View Results
-				</Button>
-			</div>
+        <Button style={{margin: 10}} variant="contained" disabled>
+          Download Variables
+        </Button>
+      </div>
 		</div>
 
   );
@@ -301,31 +361,52 @@ export default function EditModel(params) {
   ///////////////////////////////////////////////
   // Testing Window
   ///////////////////////////////////////////////
-  const testing_window = (
-  	<div>
-			<Typography variant="h6" align="left">Testing Parameters</Typography>
-			<div className={classes.paramTextFieldGroup}>
-				<TextField
-					className={classes.paramTextField}
-	        type="number"
-	        InputLabelProps={{
-	          shrink: true,
-	        }}
-	        variant="outlined"
-	        helperText="Number of Epochs"
-	      />
-	    </div>
-	    <div className={classes.paramTextFieldGroup}>
-		    <Button style={{margin: 10}} variant="contained" disabled>
-				  Test Model
-				</Button>
-				<Button style={{margin: 10}} variant="contained" disabled>
-				  View Results
-				</Button>
-			</div>
-		</div>
+  // const testing_window = (
+  // 	<div>
+		// 	<Typography variant="h6" align="left">Testing Parameters</Typography>
+		// 	<div className={classes.paramTextFieldGroup}>
+		// 		<TextField
+		// 			className={classes.paramTextField}
+	 //        type="number"
+	 //        InputLabelProps={{
+	 //          shrink: true,
+	 //        }}
+	 //        variant="outlined"
+	 //        helperText="Number of Epochs"
+	 //      />
+	 //    </div>
+	 //    <div className={classes.paramTextFieldGroup}>
+		//     <Button style={{margin: 10}} variant="contained" disabled>
+		// 		  Test Model
+		// 		</Button>
+		// 		<Button style={{margin: 10}} variant="contained" disabled>
+		// 		  View Results
+		// 		</Button>
+		// 	</div>
+		// </div>
 
-  );
+  // );
+
+  ////////////////////////////////////
+  // Results Graphs
+  ///////////////////////////////////
+  
+
+  // // View Results Dialog
+  // const view_results_dialog = (
+  //   <Dialog maxWidth={'lg'} open={openViewResults} onClose={() => setOpenViewResults(false)}>
+  //     <DialogTitle>View Results</DialogTitle>
+  //     <DialogContent>
+  //       <div className={classes.resultsWindow}>
+  //         <canvas ref={lossGraphRef} className={classes.lossGraphWindow}/>
+  //         <canvas ref={accuGraphRef} className={classes.accuracyGraphWindow}/>
+  //       </div>
+
+  //     </DialogContent>
+  //   </Dialog>
+
+  //   )
+
 
   return (
     <div>
@@ -335,7 +416,6 @@ export default function EditModel(params) {
       		{model_info_window}
       		{view_layers_dialog}
 	      	{training_window}
-	      	{testing_window}
 	      </DialogContent>
       </Dialog>
     </div>

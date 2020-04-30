@@ -17,6 +17,12 @@ const emitTrain = ({ model_key, num_epochs, batch_size, optimizer_type }) => {
 	}})
 }
 
+const requestModelFile = ({model_key}) => {
+	socket.emit("request_model_file", {data: {
+		model_key: model_key,
+	}})
+}
 
 
-export { socket, emitModel, emitTrain }
+
+export { socket, emitModel, emitTrain, requestModelFile }

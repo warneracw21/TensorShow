@@ -16,7 +16,6 @@ const ModelStoreProvider = ({children}) => {
 					layerIDs: action.layerIDs
 				}
 
-				console.log(state)
 				return state;
 			}
 
@@ -26,7 +25,6 @@ const ModelStoreProvider = ({children}) => {
 			}
 
 			case 'update_status': {
-
 				state[[action.model_key]].status = action.status
 			}
 

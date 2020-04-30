@@ -13,6 +13,7 @@ import { ModelStoreProvider } from './AppStores/ModelStore';
 import { EditModelDialogContextProvider } from './AppStores/EditModelDialogContext';
 import { ChooseDatasetDialogContextProvider } from './AppStores/ChooseDatasetDialogContext';
 import { ModelTrainStoreProvider } from './AppStores/ModelTrainStore';
+import { ServeModelFileProvider } from './AppStores/ServeModelFileContext';
 
 function App() {
   return (
@@ -26,9 +27,11 @@ function App() {
       <ChooseDatasetDialogContextProvider>
       <EditLayerDialogContextProvider>
       <ModelTrainStoreProvider>
+      <ServeModelFileProvider>
       
           <TensorShow/>
 
+      </ServeModelFileProvider>
       </ModelTrainStoreProvider>
       </EditLayerDialogContextProvider>
       </ChooseDatasetDialogContextProvider>

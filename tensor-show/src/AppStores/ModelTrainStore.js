@@ -17,14 +17,13 @@ const ModelTrainStoreProvider = ({children}) => {
 					},
 					status: "training",
 					progress: 0,
-					total_iterations: action.num_epochs
 				}
 			}
 			case ("update_accuracy"): {
-				state[action.model_key].metrics["accuracy"].push(action.accuracy_score)
+				state[action.model_key].metrics["accuracy"].push(action.accuracy)
 			}
 			case ("update_loss"): {
-				state[action.model_key].metrics["loss"].push(action.loss_score)
+				state[action.model_key].metrics["loss"].push(action.loss)
 			}
 			case ("update_progress"): {
 				state[action.model_key].progress = action.progress
@@ -48,7 +47,7 @@ const ModelTrainStoreProvider = ({children}) => {
 const useModelTrainStoreState = () => {
   const context = React.useContext(ModelTrainStoreStateContext);
   if (context === undefined) {
-    alert("Please place useCurrentLayerState in ModelTrainStoreStateContext");
+    alert("Please place useModelTrainStoreState in ModelTrainStoreStateContext");
     return;
   } else {
     return context
@@ -58,7 +57,7 @@ const useModelTrainStoreState = () => {
 const useModelTrainStoreDispatch = () => {
   const context = React.useContext(ModelTrainStoreDispatchContext);
   if (context === undefined) {
-    alert("Please place useCurrentLayerDispatch in ModelTrainStoreDispatchContext");
+    alert("Please place useModelTrainStoreDispatch in ModelTrainStoreDispatchContext");
     return;
   } else {
     return context
