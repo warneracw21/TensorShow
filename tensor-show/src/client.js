@@ -1,5 +1,5 @@
 // Set up socket connection
-var socket = require('socket.io-client')('http://localhost:5000');
+var socket = require('socket.io-client')('http://localhost:8000');
 
 const emitModel = ({ model_key, layer_params }) => {
 	socket.emit("add_new_model", {data: {
