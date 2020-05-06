@@ -5,7 +5,7 @@
 
 ### Install Python Requirements
 * `cd server`
-* `pip install requirements.txt`
+* `pip install -r requirements.txt`
 * `pip install eventlet`
 
 ### Install Node Requirements
