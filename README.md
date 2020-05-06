@@ -1,16 +1,19 @@
 # TensorShow
 ## Usage
-Clone the repository locally
+### Clone the repository locally
 * `git clone https://github.com/warneracw21/TensorShow.git`
-Install Python Requirements
+
+### Install Python Requirements
 * `cd server`
 * `pip install requirements.txt`
 * `pip install eventlet`
-Install Node Requirements
+
+### Install Node Requirements
 * `cd ../tensor-show`
 * `yarn global add serve`
 * `serve -s build`
-Run Package
+
+### Run Package
 * `sh run.sh`
 
 
